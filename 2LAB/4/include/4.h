@@ -5,7 +5,8 @@ typedef enum {
     OPT_SUCCESS,
     OPT_FAIL,
     OPT_ERROR,
-    OPT_INVALID_FORMAT
+    OPT_INVALID_FORMAT,
+    OPT_OVERFLOW
 } kOpt;
 
 typedef struct {

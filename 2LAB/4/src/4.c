@@ -87,7 +87,9 @@ kOpt FindKaprekar(KaprekarResult *results, int base, int count, ...) {
             results[i].result = OPT_INVALID_FORMAT;
         } else if (num < 0) {
             results[i].result = OPT_INVALID_FORMAT;
-        } else {
+        } else if (num == LLONG_MAX){
+            results[i].result = OPT_OVERFLOW;
+        }else   {
             results[i].result = isKaprekar(num, base);
         }
 

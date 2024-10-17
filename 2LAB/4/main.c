@@ -2,10 +2,10 @@
 #include "include/4.h"
 
 int main() {
-    int count = 5;
+    int count = 6;
     int base = 16;
     KaprekarResult results[count];
-    kOpt res = FindKaprekar(results, base, count, "45", "f", "124.1", "-0004", "000000000000000000000f");
+    kOpt res = FindKaprekar(results, base, count, "45", "f", "124.1", "-0004", "000000000000000000000f", "999999999999999999999999");
 
     switch (res) {
         case OPT_SUCCESS:
@@ -14,6 +14,8 @@ int main() {
                     printf("%s - is Kaprekar number.\n", results[i].input);
                 }else if (results[i].result == OPT_INVALID_FORMAT){
                     fprintf(stderr,"%s - isn't valid number.\n", results[i].input);
+                }else if (results[i].result == OPT_OVERFLOW){
+                    fprintf(stderr, "%s - overflow number.\n", results[i].input);
                 }else{
                     printf("%s - isn't Kaprekar number.\n", results[i].input);
                 }
