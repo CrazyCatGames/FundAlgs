@@ -11,107 +11,7 @@ unsigned int MyStrlen(const char *str) {
     return length;
 }
 
-int MyStrncmp(const char *str1, const char *str2, size_t num) {
-    for (size_t i = 0; i < num; i++) {
-        if (str1[i] != str2[i] || str1[i] == '\0' || str2[i] == '\0') {
-            return (unsigned char)str1[i] - (unsigned char)str2[i];
-        }
-    }
-    return 0;
-}
-
-int MatchSpecialSequence(const char **substring_ptr, const char **string_ptr) {
-    if (MyStrncmp(*string_ptr, "\\t", 2) == 0 && **substring_ptr == '\t') {
-        (*string_ptr) += 2;
-        (*substring_ptr)++;
-        return 1;
-    }
-    if (MyStrncmp(*string_ptr, "\\n", 2) == 0 && **substring_ptr == '\n') {
-        (*string_ptr) += 2;
-        (*substring_ptr)++;
-        return 1;
-    }
-    return 0;
-}
-
-char *MyStrstr(const char *substring, const char *string) {
-    if (!*string) {
-        return (char *) substring;
-    }
-
-    const char *h, *n;
-
-    while (*substring) {
-        h = substring;
-        n = string;
-
-        while (*h && *n) {
-            if (*h == *n) {
-                h++;
-                n++;
-            }
-            else if (MatchSpecialSequence(&h, &n)) {
-                continue;
-            } else {
-                break;
-            }
-        }
-
-        if (!*n) {
-            return (char *)substring;
-        }
-
-        substring++;
-    }
-
-    return NULL;
-}
-
-ssize_t MyGetline(char **lineptr, size_t *n, FILE *stream) {
-    if (lineptr == NULL || n == NULL || stream == NULL) {
-        return -1;
-    }
-
-    size_t pos = 0;
-    int c;
-
-    if (*lineptr == NULL) {
-        *n = 128;
-        *lineptr = malloc(*n);
-        if (*lineptr == NULL) {
-            return -1;
-        }
-    }
-
-    while ((c = fgetc(stream)) != EOF) {
-        if (c == '\n') {
-            (*lineptr)[pos++] = (char)c;
-            break;
-        }
-
-        if (pos + 1 >= *n) {
-            *n *= 2;
-            char *new_ptr = realloc(*lineptr, *n);
-            if (new_ptr == NULL) {
-                return -1;
-            }
-            *lineptr = new_ptr;
-        }
-
-        (*lineptr)[pos++] = (char)c;
-    }
-
-    if (pos == 0 && c == EOF) {
-        return -1;
-    }
-
-    (*lineptr)[pos] = '\0';
-    return pos;
-}
-
-int AddAnswer(SearchResult *results, const char *file_path, int line_number, int position) {
-    static int result_count = 0;
-
+int AddAnswer(SearchResult *results, int result_count, const char *file_path, int line_number, int position) {
     if (results == NULL) {
         return OPT_ERROR;
     }
@@ -121,7 +21,6 @@ int AddAnswer(SearchResult *results, const char *file_path, int line_number, int
     results[result_count].position = position;
     results[result_count].found = 1;
 
-    result_count++;
     return OPT_SUCCESS;
 }
 
@@ -164,7 +63,7 @@ int SearchInFiles(SearchResult *results, const char *substring, int num_files, .
                 }
 
                 if (idx_substr == len_substr) {
-                    if (AddAnswer(results, file_path, n_line_answ, n_char_answ) == OPT_ERROR) {
+                    if (AddAnswer(results, result_count, file_path, n_line_answ, n_char_answ) == OPT_ERROR) {
                         fclose(file);
                         va_end(files_list);
                         return -1;

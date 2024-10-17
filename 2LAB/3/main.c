@@ -1,18 +1,17 @@
 #include "include/3.h"
 #include <stdio.h>
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <substring> <file1> [file2 ... fileN]\n", argv[0]);
-        return 1;
-    }
+int main() {
 
-    const char *substring = argv[1];
-    int num_files = argc - 2;
+    const char *substring = "a1\ta";
+    int num_files = 3;
 
+    const char *file1 = "C:\\Users\\user\\CLionProjects\\FUNDLABS\\2LAB\\3\\examples\\file1.txt";
+    const char *file2 = "C:\\Users\\user\\CLionProjects\\FUNDLABS\\2LAB\\3\\examples\\file2.txt";
+    const char *file3 = "C:\\Users\\user\\CLionProjects\\FUNDLABS\\2LAB\\3\\examples\\file3.txt";
     SearchResult results[50];
 
-    int result_count = SearchInFiles(results, substring, num_files, argv[2], argv[3], argv[4]);
+    int result_count = SearchInFiles(results, substring, num_files, file1, file2, file3);
     for (int i = 0; i < result_count; i++) {
         if (results[i].found == 1) {
             printf("Substring '%s' found in line %d, position: %d. File: %s\n",
