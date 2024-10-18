@@ -1,6 +1,4 @@
 #include "../include/4.h"
-#include <ctype.h>
-#include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -78,10 +76,8 @@ kOpt FindKaprekar(KaprekarResult *results, int base, int count, ...) {
     for (int i = 0; i < count; i++) {
         const char *numStr = va_arg(args, const char *);
 
-
         char *endptr;
         long long num = strtoll(numStr, &endptr, base);
-
 
         if (endptr == numStr || *endptr != '\0') {
             results[i].result = OPT_INVALID_FORMAT;
