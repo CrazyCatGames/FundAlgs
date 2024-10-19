@@ -9,12 +9,11 @@
 
 optRealloc MyRealloc(void **var, int size) {
 	void *new_ptr = realloc(*var, size);
-	if (new_ptr != NULL) {
-		*var = new_ptr;
-		return OPT_REALLOC_SUCCESS;
-	} else {
+	if (!new_ptr){
 		return OPT_REALLOC_FAIL;
 	}
+	*var = new_ptr;
+	return OPT_REALLOC_SUCCESS;
 }
 
 bool is_digit_str(const char *str, int size) {
@@ -181,36 +180,40 @@ int overfscanf(FILE *stream, const char *format, ...) {
 
 	int argc = 0;
 	for (int i = 0; i < size_format; i++) {
-		if (format[i] == '%') {
-			if (format[i + 1] != '%') {
-				argc++;
-			}
+		if (format[i] == '%' &&  format[i + 1] != '%') {
+			argc++;
 		}
 	}
 
 	va_list ptr;
 	va_start(ptr, format);
+
 	int index = 0;
 	char *flag = NULL;
-	int ret_value = 0;
+	int count_values = 0;
 	for (int i = 0; i < argc; i++) {
 		int size_flag = 1;
 		int capacity_flag = 2;
+
 		while (format[index] != '%' && index < size_format) {
 			index++;
+		}
+
+		if (index >= size_format){
+			break;
 		}
 
 		flag = (char *) malloc(sizeof(char) * (capacity_flag + 2));
 		if (!flag) {
 			printf("Error malloc memory.\n");
+			va_end(ptr);
 			return -1;
 		}
 
 		flag[0] = '%';
 		index++;
 		while ((isdigit(format[index])) || (isalpha(format[index])) && (index < size_format)) {
-			char symbol = format[index];
-			flag[size_flag] = symbol;
+			flag[size_flag] = format[index];
 			size_flag++;
 
 			if (size_flag == capacity_flag - 1) {
@@ -219,6 +222,7 @@ int overfscanf(FILE *stream, const char *format, ...) {
 				if (st_realloc == OPT_REALLOC_FAIL) {
 					free(flag);
 					printf("Can`t realloc memory!\n");
+					va_end(ptr);
 					return -1;
 				}
 			}
@@ -226,54 +230,55 @@ int overfscanf(FILE *stream, const char *format, ...) {
 		}
 
 		flag[size_flag] = '\0';
+
 		if (!strcmp(flag, "%Ro\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
 			char tmp[STR_SIZE];
-			ret_value += fscanf(stream, "%s", tmp);
+			count_values += fscanf(stream, "%s", tmp);
 			FromRoman(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Zr\0")) {
 			unsigned int *arg_ptr = va_arg(ptr, unsigned int *);
 			char tmp[STR_SIZE];
-			ret_value += fscanf(stream, "%s", tmp);
+			count_values += fscanf(stream, "%s", tmp);
 			FromZeckendorf(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Cv\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
 			argc++;
 			int base = va_arg(ptr, int);
-			char number_str[STR_SIZE];
-			ret_value += fscanf(stream, "%s", number_str);
-			int size = strlen(number_str);
+			char tmp[STR_SIZE];
+			count_values += fscanf(stream, "%s", tmp);
+			int size = strlen(tmp);
 
-			if (is_upper(number_str, size) && !is_digit_str(number_str, size)) {
-				printf("Letters are in upper case!!!\n");
+			if (is_upper(tmp, size) && !is_digit_str(tmp, size)) {
+				printf("Letters are in upper case.\n");
 				(*arg_ptr) = 0;
 			} else {
-				ToDecimal(number_str, base, arg_ptr, 0);
+				ToDecimal(tmp, base, arg_ptr, 0);
 			}
 		} else if (!strcmp(flag, "%CV\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
 			argc++;
 			int base = va_arg(ptr, int);
-			char number_str[STR_SIZE];
-			ret_value += fscanf(stream, "%s", number_str);
-			int size = strlen(number_str);
+			char tmp[STR_SIZE];
+			count_values += fscanf(stream, "%s", tmp);
+			int size = strlen(tmp);
 
-			if (is_lower(number_str, size) && !is_digit_str(number_str, size)) {
-				printf("Letters are in lower case\n");
+			if (is_lower(tmp, size) && !is_digit_str(tmp, size)) {
+				printf("Letters are in lower case.\n");
 				(*arg_ptr) = 0;
 			} else {
-				ToDecimal(number_str, base, arg_ptr, 1);
+				ToDecimal(tmp, base, arg_ptr, 1);
 			}
 		} else {
 			void *tmp_arg = va_arg(ptr, void *);
-			ret_value += fscanf(stream, flag, tmp_arg);
+			count_values += fscanf(stream, flag, tmp_arg);
 		}
 		free(flag);
 		flag = NULL;
 	}
 
 	va_end(ptr);
-	return ret_value;
+	return count_values;
 }
 
 int oversscanf(char *buf, const char *format, ...) {
@@ -301,7 +306,7 @@ int oversscanf(char *buf, const char *format, ...) {
 	int index = 0;
 	int buf_index = 0;
 	char *flag = NULL;
-	int ret_value = 0;
+	int count_values = 0;
 
 	for (int i = 0; i < argc; i++) {
 		int size_flag = 1;
@@ -340,13 +345,13 @@ int oversscanf(char *buf, const char *format, ...) {
 		if (!strcmp(flag, "%Ro\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
 			char tmp[STR_SIZE];
-			ret_value += sscanf(buf_index + buf, "%s", tmp);
+			count_values += sscanf(buf_index + buf, "%s", tmp);
 			buf_index += strlen(tmp) + 1;
 			FromRoman(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Zr\0")) {
 			unsigned int *arg_ptr = va_arg(ptr, unsigned int *);
 			char tmp[STR_SIZE];
-			ret_value += sscanf(buf_index + buf, "%s", tmp);
+			count_values += sscanf(buf_index + buf, "%s", tmp);
 			buf_index += strlen(tmp) + 1;
 			FromZeckendorf(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Cv\0")) {
@@ -354,12 +359,12 @@ int oversscanf(char *buf, const char *format, ...) {
 			argc++;
 			int base = va_arg(ptr, int);
 			char number_str[STR_SIZE];
-			ret_value += sscanf(buf_index + buf, "%s", number_str);
+			count_values += sscanf(buf_index + buf, "%s", number_str);
 			int size = strlen(number_str);
 			buf_index += size + 1;
 
 			if (is_upper(number_str, size) && !is_digit_str(number_str, size)) {
-				printf("Letters are in upper case\n");
+				printf("Letters are in upper case.\n");
 				(*arg_ptr) = 0;
 			} else {
 				ToDecimal(number_str, base, arg_ptr, 0);
@@ -371,12 +376,12 @@ int oversscanf(char *buf, const char *format, ...) {
 			argc++;
 			int base = va_arg(ptr, int);
 			char number_str[STR_SIZE];
-			ret_value += sscanf(buf_index + buf, "%s", number_str);
+			count_values += sscanf(buf_index + buf, "%s", number_str);
 			int size = strlen(number_str);
 			buf_index += size + 1;
 
 			if (is_lower(number_str, size) && !is_digit_str(number_str, size)) {
-				printf("Letters are in lower case\n");
+				printf("Letters are in lower case.\n");
 				(*arg_ptr) = 0;
 			} else {
 				ToDecimal(number_str, base, arg_ptr, 1);
@@ -385,13 +390,14 @@ int oversscanf(char *buf, const char *format, ...) {
 			argc--;
 		} else {
 			void *tmp_arg = va_arg(ptr, void *);
-			ret_value += sscanf(buf_index + buf, flag, tmp_arg);
+			count_values += sscanf(buf_index + buf, flag, tmp_arg);
 			buf_index += strlen(tmp_arg) + 1;
 		}
 
 		free(flag);
 		flag = NULL;
 	}
+
 	va_end(ptr);
-	return ret_value;
+	return count_values;
 }

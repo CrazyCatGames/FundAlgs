@@ -3,7 +3,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#define STR_SIZE 256
+
+#define STR_SIZE 1024
 
 typedef enum optRealloc {
 	OPT_REALLOC_SUCCESS,
