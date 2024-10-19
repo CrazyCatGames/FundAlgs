@@ -3,15 +3,15 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-void Derivate(int degree, double coeffs[]) {
+void Derivate(int degree, double *coeffs) {
   for (int i = 0; i < degree; i++) {
     coeffs[i] = coeffs[i + 1] * (i + 1);
   }
 }
 
-kOpt SolvePolynomial(double* res, double point, int degree, double coefs[]) {
+kOpt SolvePolynomial(double* res, double point, int degree, const double *coefs) {
   *res = 0;
-  int cur_degree = 1;
+  double cur_degree = 1.0;
   for (int i = 0; i < degree + 1; i++) {
     *res += coefs[i] * cur_degree;
     cur_degree *= point;
@@ -30,8 +30,11 @@ kOpt SolveCoefs(double a, double** coefs_g, int* size_coefs, int degree, double 
   if (*coefs_g == NULL) {
     return OPT_ALLOC;
   }
-    
-  double coefs[degree + 1];
+
+  double *coefs = (double*)malloc((degree + 1) * sizeof(double));
+  if (!*coefs){
+      return OPT_ALLOC;
+  }
   for (int i = 0; i < degree + 1; i++) {
     coefs[i] = va_arg(ptr, double);
   }
@@ -57,5 +60,6 @@ kOpt SolveCoefs(double a, double** coefs_g, int* size_coefs, int degree, double 
   }
     
   *size_coefs = degree + 1;
+  free(coefs);
   return OPT_SUCCESS;
 }
