@@ -590,6 +590,7 @@ int oversprintf(char *buf, char *format, ...) {
 			cur_format[j - i] = '\0';
 			i = j - 1;
 			count += vsprintf(buf + count, cur_format, args);
+			void* x = va_arg(args, void*);
 		} else {
 			buf[count++] = format[i];
 		}

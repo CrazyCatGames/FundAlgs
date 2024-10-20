@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 
 	printf("\n");
     char buf[STR_SIZE];
-    oversprintf(buf, "Number is: %Ro", 123);
+    oversprintf(buf, "Number is: %Ro %d %f", 123, 4, 5.5);
     printf("%s\n", buf);
     oversprintf(buf, "Number is: %Cv, %CV", 0010, 5, 1234, 16);
     printf("%s\n", buf);
