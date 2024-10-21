@@ -7,15 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-optRealloc MyRealloc(void **var, int size) {
-	void *new_ptr = realloc(*var, size);
-	if (!new_ptr){
-		return OPT_REALLOC_FAIL;
-	}
-	*var = new_ptr;
-	return OPT_REALLOC_SUCCESS;
-}
-
 bool is_digit_str(const char *str, int size) {
 	for (int i = 0; i < size; i++) {
 		if (!isdigit(str[i])) {
@@ -218,8 +209,8 @@ int overfscanf(FILE *stream, const char *format, ...) {
 
 			if (size_flag == capacity_flag - 1) {
 				capacity_flag *= 2;
-				optRealloc st_realloc = MyRealloc((void **) flag, capacity_flag);
-				if (st_realloc == OPT_REALLOC_FAIL) {
+				char *new_flag = (char *) realloc(flag, capacity_flag);
+				if (!new_flag){
 					free(flag);
 					printf("Can`t realloc memory!\n");
 					va_end(ptr);
@@ -277,6 +268,10 @@ int overfscanf(FILE *stream, const char *format, ...) {
 		flag = NULL;
 	}
 
+	if (flag != NULL){
+		free(flag);
+	}
+
 	va_end(ptr);
 	return count_values;
 }
@@ -330,10 +325,11 @@ int oversscanf(char *buf, const char *format, ...) {
 
 			if (size_flag == capacity_flag - 1) {
 				capacity_flag *= 2;
-				optRealloc st_realloc = MyRealloc((void **) flag, capacity_flag);
-				if (st_realloc == OPT_REALLOC_FAIL) {
+				char *new_flag = (char *) realloc(flag, capacity_flag);
+				if (!new_flag){
 					free(flag);
 					printf("Can`t realloc memory!\n");
+					va_end(ptr);
 					return -1;
 				}
 			}
