@@ -216,6 +216,7 @@ int overfscanf(FILE *stream, const char *format, ...) {
 					va_end(ptr);
 					return -1;
 				}
+				flag = new_flag;
 			}
 			index++;
 		}
@@ -332,6 +333,7 @@ int oversscanf(char *buf, const char *format, ...) {
 					va_end(ptr);
 					return -1;
 				}
+				flag = new_flag;
 			}
 			index++;
 		}
