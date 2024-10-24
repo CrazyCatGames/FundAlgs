@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define STR_SIZE 1024
+#define STR_SIZE 2048
 
 typedef enum kOpt {
     OPT_SUCCESS,

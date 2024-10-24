@@ -10,11 +10,11 @@
 
 kOpt ToRoman(int number, char **roman_value) {
 	const int numbers[13] = {1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000};
-	const char letters[13][2] = {"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"};
+	const char *letters[13] = {"I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"};
 	int roman_size = 0;
 	int roman_capacity = 2;
 	(*roman_value) = (char *)malloc(sizeof(char) * roman_capacity);
-	if (*roman_value == NULL) {
+	if (!*roman_value) {
 		return OPT_ERROR_ALLOC;
 	}
 
@@ -28,20 +28,20 @@ kOpt ToRoman(int number, char **roman_value) {
 		int index = 13;
 		while (numbers[--index] > number);
 
-		for (int i = 0; i < 2; i++) {
-			if (letters[index][i] == 'I' || letters[index][i] == 'V' || letters[index][i] == 'X' ||
-			    letters[index][i] == 'L' || letters[index][i] == 'C' || letters[index][i] == 'D' ||
-			    letters[index][i] == 'M') {
-				(*roman_value)[roman_size] = letters[index][i];
-				roman_size++;
-				if (roman_size == roman_capacity - 1) {
-					roman_capacity *= 2;
-					char *new_memory = (char *)realloc(*roman_value, sizeof(char) * roman_capacity);
-					if (new_memory == NULL) {
-						return OPT_ERROR_ALLOC;
-					}
-					*roman_value = new_memory;
+		const char *symbol = letters[index];
+		unsigned long long symbol_len = strlen(symbol);
+
+		for (int i = 0; i < symbol_len; i++) {
+			(*roman_value)[roman_size] = symbol[i];
+			roman_size++;
+			if (roman_size == roman_capacity - 1) {
+				roman_capacity *= 2;
+				char *new_memory = (char *)realloc(*roman_value, sizeof(char) * roman_capacity);
+				if (new_memory == NULL) {
+					free(*roman_value);
+					return OPT_ERROR_ALLOC;
 				}
+				*roman_value = new_memory;
 			}
 		}
 		number -= numbers[index];
@@ -76,7 +76,7 @@ void Zeckendorf(int *result_size, unsigned int number, unsigned int result[numbe
 }
 
 char *MemoryDump(void *src, int size) {
-	char *res = (char *)malloc((9 * size) * sizeof(char));
+	char *res = (char *)malloc((size * 9) * sizeof(char));
 	if (!res) {
 		return NULL;
 	}
@@ -137,6 +137,7 @@ kOpt FromDecimal(long long decimal_number, int base, int flag, char **result) {
 		if (size > sizeof(*result) - 1) {
 			char *new_result = (char *)realloc(*result, (size * 2) * sizeof(char));
 			if (new_result == NULL) {
+				free(*result);
 				return OPT_ERROR_ALLOC;
 			}
 			*result = new_result;
@@ -238,18 +239,16 @@ int overfprintf(FILE *stream, char *format, ...) {
 
 	for (int i = 0; i < len_format; ++i) {
 		if (format[i] == '%' && i < len_format - 2 && format[i + 1] == 'R' && format[i + 2] == 'o') {
-			int x = va_arg(args, int);
 			char *roman_value = NULL;
-			kOpt st_roman = ToRoman(x, &roman_value);
+			kOpt st_roman = ToRoman(va_arg(args, int), &roman_value);
 			if (st_roman == OPT_ERROR_ALLOC) {
-				printf("Error malloc memory\n");
-				free(roman_value);
+				printf("Error malloc memory.\n");
 				return -2;
 			}
 
 			count += fprintf(stream, "%s", roman_value);
-			i += 2;
 			free(roman_value);
+			i += 2;
 		} else if (format[i] == '%' && i < len_format - 2 && format[i + 1] == 'Z' && format[i + 2] == 'r') {
 			unsigned int number = va_arg(args, unsigned int);
 			int res_size;
@@ -290,7 +289,6 @@ int overfprintf(FILE *stream, char *format, ...) {
 			char *result = NULL;
 			kOpt st_convert = FromDecimal(number_to_convert, base, 1, &result);
 			if (st_convert == OPT_ERROR_ALLOC) {
-				free(result);
 				printf("Error malloc memory\n");
 				return -2;
 			}
@@ -344,7 +342,7 @@ int overfprintf(FILE *stream, char *format, ...) {
 			int x = va_arg(args, int);
 			char *res;
 			res = MemoryDump(&x, sizeof(int));
-			if (res) {
+			if (res != NULL) {
 				count += fprintf(stream, "%s", res);
 			} else {
 				printf("Error malloc memory.\n");
@@ -395,13 +393,13 @@ int overfprintf(FILE *stream, char *format, ...) {
 			char cur_format[7];
 			cur_format[0] = '%';
 			int j;
-			for (j = i + 1; j < i + 6 && format[j] != '%' && j < len_format; ++j) {
+			for (j = i + 1; j < i + 6 && (format[j] != ' ' && format[j] != '%') && j < len_format; ++j) {
 				cur_format[j - i] = format[j];
 			}
+
 			cur_format[j - i] = '\0';
 			i = j - 1;
 			count += vfprintf(stream, cur_format, args);
-			void* x = va_arg(args, void*);
 		} else {
 			count += fprintf(stream, "%c", format[i]);
 		}
@@ -416,15 +414,20 @@ int oversprintf(char *buf, char *format, ...) {
 	va_list args;
 	va_start(args, format);
 
-	unsigned long long len_format = strlen(format), count = 0;
+	unsigned long long len_format = strlen(format);
+	int count = 0;
 
 	for (int i = 0; i < len_format; ++i) {
+		if (count >= STR_SIZE){
+			printf("Error. Buffer is too small.\n");
+			return -3;
+		}
 		if (format[i] == '%' && i < len_format - 2 && format[i + 1] == 'R' && format[i + 2] == 'o') {
 			char *roman_value = NULL;
 			kOpt st_roman = ToRoman(va_arg(args, int), &roman_value);
 			if (st_roman == OPT_ERROR_ALLOC) {
 				printf("Error malloc memory.\n");
-				free(roman_value);
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -457,8 +460,8 @@ int oversprintf(char *buf, char *format, ...) {
 			char *res = NULL;
 			kOpt st_convert = FromDecimal(x, base, 0, &res);
 			if (st_convert == OPT_ERROR_ALLOC) {
-				free(res);
 				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -473,8 +476,8 @@ int oversprintf(char *buf, char *format, ...) {
 			char *res = NULL;
 			kOpt st_convert = FromDecimal(x, base, 1, &res);
 			if (st_convert == OPT_ERROR_ALLOC) {
-				free(res);
 				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -535,7 +538,8 @@ int oversprintf(char *buf, char *format, ...) {
 			if (res) {
 				count += sprintf(buf + count, "%s", res);
 			} else {
-				printf("Error malloc memeory.\n");
+				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 			i += 2;
@@ -547,7 +551,8 @@ int oversprintf(char *buf, char *format, ...) {
 			if (res) {
 				count += sprintf(buf + count, "%s", res);
 			} else {
-				printf("Error malloc memeory.\n");
+				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -560,7 +565,8 @@ int oversprintf(char *buf, char *format, ...) {
 			if (res) {
 				count += sprintf(buf + count, "%s", res);
 			} else {
-				printf("Error malloc memeory.\n");
+				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -573,7 +579,8 @@ int oversprintf(char *buf, char *format, ...) {
 			if (res) {
 				count += sprintf(buf + count, "%s", res);
 			} else {
-				printf("Error malloc memeory.\n");
+				printf("Error malloc memory.\n");
+				memset(buf, 0, STR_SIZE);
 				return -2;
 			}
 
@@ -590,7 +597,6 @@ int oversprintf(char *buf, char *format, ...) {
 			cur_format[j - i] = '\0';
 			i = j - 1;
 			count += vsprintf(buf + count, cur_format, args);
-			void* x = va_arg(args, void*);
 		} else {
 			buf[count++] = format[i];
 		}
