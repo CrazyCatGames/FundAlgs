@@ -262,6 +262,11 @@ int overfscanf(FILE *stream, const char *format, ...) {
 		} else {
 			void *tmp_arg = va_arg(ptr, void*);
 			count_values += fscanf(stream, flag, tmp_arg);
+			char c;
+			while (c = fgetc(stream) != ' ');
+			if (c == ' '){
+				ungetc(' ', stream);
+			}
 		}
 		free(flag);
 		flag = NULL;
@@ -327,7 +332,7 @@ int oversscanf(char *buf, const char *format, ...) {
 				char *new_flag = (char *) realloc(flag, capacity_flag);
 				if (!new_flag){
 					free(flag);
-					printf("Can`t realloc memory!\n");
+					printf("Can`t realloc memory.\n");
 					va_end(ptr);
 					return OPT_ERROR_ALLOC;
 				}
@@ -352,7 +357,6 @@ int oversscanf(char *buf, const char *format, ...) {
 			FromZeckendorf(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Cv\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
-			argc++;
 			int base = va_arg(ptr, int);
 			char number_str[STR_SIZE];
 			count_values += sscanf(buf_index + buf, "%s", number_str);
@@ -366,10 +370,8 @@ int oversscanf(char *buf, const char *format, ...) {
 				ToDecimal(number_str, base, arg_ptr, 0);
 			}
 
-			argc--;
 		} else if (!strcmp(flag, "%CV\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
-			argc++;
 			int base = va_arg(ptr, int);
 			char number_str[STR_SIZE];
 			count_values += sscanf(buf_index + buf, "%s", number_str);
@@ -383,7 +385,6 @@ int oversscanf(char *buf, const char *format, ...) {
 				ToDecimal(number_str, base, arg_ptr, 1);
 			}
 
-			argc--;
 		} else {
 			void *tmp_arg = va_arg(ptr, void *);
 			count_values += sscanf(buf_index + buf, flag, tmp_arg);

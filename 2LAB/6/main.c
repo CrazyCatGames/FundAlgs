@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 	char s[STR_SIZE];
 	int num1, num2, num3;
 	unsigned int num4;
-	if (overfscanf(file, "%CV %Zr %s %Cv %Ro", &num1, 16, &num4, s, &num2, 16, &num3) == OPT_ERROR_ALLOC) {
+	if (overfscanf(file, "%CV %Zr %3s %Cv %Ro", &num1, 16, &num4, s, &num2, 16, &num3) == OPT_ERROR_ALLOC) {
 		printf("Error alloc memory.\n");
 		fclose(file);
 		return 1;
