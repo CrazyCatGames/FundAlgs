@@ -5,7 +5,7 @@
 
 typedef enum kOpts {
     OPT_SUCCESS,
-    OPT_ERROR
+    OPT_ERROR,
 } kOpts;
 
 typedef struct SearchResult{
@@ -15,8 +15,7 @@ typedef struct SearchResult{
     int found;
 } SearchResult;
 
-int SearchInFiles(SearchResult *results, const char *substring, int num_files, ...);
+kOpts SearchInFiles(SearchResult **results, int *result_count, int *capacity, const char *substring, int num_files, ...);
 unsigned int MyStrlen(const char *str);
-char* Mystrstr(const char *substring, const char *string);
 
 #endif
