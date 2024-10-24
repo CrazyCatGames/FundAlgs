@@ -97,7 +97,7 @@ kOpt FromZeckendorf(const char *number_z, unsigned int *number) {
 	}
 
 	unsigned int num1 = 0;
-	unsigned int num2 = 1;
+	unsigned int num2 = 0;
 	unsigned int cur = 1;
 	*number = 0;
 	for (int i = 0; i < size - 1; i++) {
@@ -198,7 +198,7 @@ int overfscanf(FILE *stream, const char *format, ...) {
 		if (!flag) {
 			printf("Error malloc memory.\n");
 			va_end(ptr);
-			return -1;
+			return OPT_ERROR_ALLOC;
 		}
 
 		flag[0] = '%';
@@ -214,7 +214,7 @@ int overfscanf(FILE *stream, const char *format, ...) {
 					free(flag);
 					printf("Can`t realloc memory!\n");
 					va_end(ptr);
-					return -1;
+					return OPT_ERROR_ALLOC;
 				}
 				flag = new_flag;
 			}
@@ -235,7 +235,6 @@ int overfscanf(FILE *stream, const char *format, ...) {
 			FromZeckendorf(tmp, arg_ptr);
 		} else if (!strcmp(flag, "%Cv\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
-			argc++;
 			int base = va_arg(ptr, int);
 			char tmp[STR_SIZE];
 			count_values += fscanf(stream, "%s", tmp);
@@ -249,7 +248,6 @@ int overfscanf(FILE *stream, const char *format, ...) {
 			}
 		} else if (!strcmp(flag, "%CV\0")) {
 			int *arg_ptr = va_arg(ptr, int *);
-			argc++;
 			int base = va_arg(ptr, int);
 			char tmp[STR_SIZE];
 			count_values += fscanf(stream, "%s", tmp);
@@ -262,14 +260,14 @@ int overfscanf(FILE *stream, const char *format, ...) {
 				ToDecimal(tmp, base, arg_ptr, 1);
 			}
 		} else {
-			void *tmp_arg = va_arg(ptr, void *);
+			void *tmp_arg = va_arg(ptr, void*);
 			count_values += fscanf(stream, flag, tmp_arg);
 		}
 		free(flag);
 		flag = NULL;
 	}
 
-	if (flag != NULL){
+	if (flag){
 		free(flag);
 	}
 
@@ -314,7 +312,7 @@ int oversscanf(char *buf, const char *format, ...) {
 		flag = (char *) malloc(sizeof(char) * (capacity_flag + 2));
 		if (!flag) {
 			printf("Error malloc memory.\n");
-			return -1;
+			return OPT_ERROR_ALLOC;
 		}
 
 		flag[0] = '%';
@@ -331,7 +329,7 @@ int oversscanf(char *buf, const char *format, ...) {
 					free(flag);
 					printf("Can`t realloc memory!\n");
 					va_end(ptr);
-					return -1;
+					return OPT_ERROR_ALLOC;
 				}
 				flag = new_flag;
 			}

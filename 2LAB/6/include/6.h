@@ -17,7 +17,6 @@ typedef enum kOpt {
 	OPT_ERROR_ALLOC
 } kOpt;
 
-optRealloc MyRealloc(void** var, int size);
 bool is_lower(const char* str, int size);
 bool is_upper(const char* str, int size);
 bool is_digit_str(const char* str, int size);
