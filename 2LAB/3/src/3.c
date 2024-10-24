@@ -12,8 +12,7 @@ unsigned int MyStrlen(const char *str) {
 	return length;
 }
 
-int AddAnswer(SearchResult **results, int *result_count, int *capacity, const char *file_path, int line_number,
-              int position) {
+int AddAnswer(SearchResult **results, int *result_count, int *capacity, const char *file_path, int line_number, int position) {
 	if (*results == NULL) {
 		return OPT_ERROR;
 	}
@@ -39,8 +38,7 @@ int AddAnswer(SearchResult **results, int *result_count, int *capacity, const ch
 	return OPT_SUCCESS;
 }
 
-kOpts SearchInFiles(SearchResult **results, int *result_count, int *capacity, const char *substring, int num_files,
-                    ...) {
+kOpts SearchInFiles(SearchResult **results, int *result_count, int *capacity, const char *substring, int num_files, ...) {
 	va_list files_list;
 	va_start(files_list, num_files);
 
@@ -56,8 +54,8 @@ kOpts SearchInFiles(SearchResult **results, int *result_count, int *capacity, co
 
 		int c;
 		int n_char = 0, n_line = 1;
-		int idx_substr = 0;
-		int n_line_answ = 0, n_char_answ = 0;
+		int idx = 0;
+		int n_line_answ = 0, n_char_answer = 0;
 		int found = 0;
 
 		while ((c = getc(file)) != EOF) {
@@ -67,35 +65,35 @@ kOpts SearchInFiles(SearchResult **results, int *result_count, int *capacity, co
 				n_char = 0;
 			}
 
-			if (c == substring[idx_substr]) {
-				idx_substr++;
-				if (idx_substr == 1) {
+			if (c == substring[idx]) {
+				idx++;
+				if (idx == 1) {
 					n_line_answ = n_line;
-					n_char_answ = n_char;
+					n_char_answer = n_char;
 				}
 
-				if (idx_substr == len_substr) {
-					if (AddAnswer(results, result_count, capacity, file_path, n_line_answ, n_char_answ) == OPT_ERROR) {
+				if (idx == len_substr) {
+					if (AddAnswer(results, result_count, capacity, file_path, n_line_answ, n_char_answer) == OPT_ERROR) {
 						fclose(file);
 						va_end(files_list);
 					}
 
-					fseek(file, -idx_substr + 1, SEEK_CUR);
+					fseek(file, -idx + 1, SEEK_CUR);
 					n_char = 1;
 					if (n_line != n_line_answ){
 						n_line = n_line_answ + 1;
 					}
-					idx_substr = 0;
+					idx = 0;
 					found = 1;
 				}
-			} else if (idx_substr > 0) {
-				fseek(file, -idx_substr + 1, SEEK_CUR);
+			} else if (idx > 0) {
+				fseek(file, -idx + 1, SEEK_CUR);
 
-				n_char -= (idx_substr - 1);
+				n_char -= (idx - 1);
 				if (n_line != n_line_answ){
 					n_line = n_line_answ + 1;
 				}
-				idx_substr = 0;
+				idx = 0;
 			}
 		}
 
