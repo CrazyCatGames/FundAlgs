@@ -60,9 +60,6 @@ int CompareB(const void* a, const void *b){
 
 kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
 	int capacity = 2, count_read;
-	if (!output_data) return OPT_ERROR_INPUT;
-
-	*output_data = NULL;
 
 	Employee *data = (Employee *) malloc(sizeof(Employee) * capacity);
 	if (!data) return OPT_ERROR_MEMORY;
@@ -72,6 +69,7 @@ kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
 			free(data);
 			return OPT_ERROR_INPUT;
 		}
+
 		(*size)++;
 		if (*size == capacity) {
 			capacity *= 2;

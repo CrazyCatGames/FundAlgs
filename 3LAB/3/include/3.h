@@ -8,7 +8,7 @@
 typedef enum kOpt{
 	OPT_SUCCESS,
 	OPT_ERROR_INPUT,
-	OPT_ERROR_MEMORY,
+	OPT_ERROR_MEMORY
 } kOpt;
 
 typedef struct Employee{

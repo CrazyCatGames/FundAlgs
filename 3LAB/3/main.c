@@ -37,9 +37,13 @@ int main(int argc, char **argv) {
 			break;
 		case OPT_ERROR_INPUT:
 			fprintf(stderr, "Incorrect values.\n");
+			fclose(input);
+			fclose(output);
 			return -3;
 		case OPT_ERROR_MEMORY:
 			fprintf(stderr, "Error alloc memory.\n");
+			fclose(input);
+			fclose(output);
 			return -4;
 	}
 
