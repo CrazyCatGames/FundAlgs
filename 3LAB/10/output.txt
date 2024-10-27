@@ -1,0 +1,45 @@
+Tree number 1:
+A
+  B
+    E
+      G
+      T
+    R
+      W
+      Z
+  F
+    L
+    M
+  C
+
+Tree number 2:
+A
+  B
+    E
+      G
+      T
+      R
+        W
+        Z
+    F
+      L
+      M
+  C
+
+Tree number 3:
+A
+  B
+  C
+  D
+  E
+  F
+  G
+    1
+    2
+    3
+      G
+      S
+      A
+      B
+      C
+
