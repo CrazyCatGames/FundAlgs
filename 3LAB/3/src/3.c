@@ -13,6 +13,7 @@ kOpt ValidateInput(int argc, char **argv) {
 	char full_path_1[BUFSIZ], full_path_2[BUFSIZ];
 	if (!realpath(argv[1], full_path_1) || !realpath(argv[3], full_path_2)) return OPT_ERROR_INPUT;
 	if (!strcmp(full_path_1, full_path_2)) return OPT_ERROR_INPUT;
+
 	return OPT_SUCCESS;
 }
 
@@ -58,15 +59,62 @@ int CompareB(const void* a, const void *b){
 	return CompareA(a, b) * -1;
 }
 
+char *ReadString(FILE *file, int flag) {
+	int capacity = 16;
+	int length = 0;
+	char *str = (char *)malloc(capacity * sizeof(char));
+	if (!str) return NULL;
+
+	char ch;
+	if (!flag) ch = getc(file);
+
+	while ((ch = fgetc(file)) != EOF && ch != ' ' && ch != '\n') {
+		str[length++] = ch;
+		if (length >= capacity) {
+			capacity *= 2;
+			char *temp = (char *)realloc(str, capacity * sizeof(char));
+			if (!temp) {
+				free(str);
+				return NULL;
+			}
+			str = temp;
+		}
+	}
+
+	str[length] = '\0';
+	return str;
+}
+
+void FreeEmployee(Employee *data, int size) {
+	for (int i = 0; i < size; i++) {
+		free(data[i].name);
+		free(data[i].surname);
+	}
+	free(data);
+}
+
 kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
-	int capacity = 2, count_read;
+	int capacity = 2;
 
 	Employee *data = (Employee *) malloc(sizeof(Employee) * capacity);
 	if (!data) return OPT_ERROR_MEMORY;
 
-	while ((count_read = fscanf(file, "%u %s %s %lf\n", &data[*size].id, data[*size].name, data[*size].surname, &data[*size].salary)) == 4) {
-		if (ValidateData(data[(*size)])) {
-			free(data);
+	while (fscanf(file, "%u", &data[*size].id) == 1) {
+		data[*size].name = ReadString(file, 0);
+		data[*size].surname = ReadString(file, 1);
+
+		if (!data[*size].name || !data[*size].surname) {
+			FreeEmployee(data, *size);
+			return OPT_ERROR_MEMORY;
+		}
+
+		if (fscanf(file, "%lf", &data[*size].salary) != 1) {
+			FreeEmployee(data, *size);
+			return OPT_ERROR_INPUT;
+		}
+
+		if (ValidateData(data[*size]) != OPT_SUCCESS) {
+			FreeEmployee(data, *size);
 			return OPT_ERROR_INPUT;
 		}
 
@@ -75,17 +123,13 @@ kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
 			capacity *= 2;
 			Employee *tmp_realloc = (Employee *) realloc(data, capacity * sizeof(Employee));
 			if (!tmp_realloc) {
-				free(data);
+				FreeEmployee(data, *size);
 				return OPT_ERROR_MEMORY;
 			}
 			data = tmp_realloc;
 		}
 	}
 
-	if (count_read < 4 && count_read > 0) {
-		free(data);
-		return OPT_ERROR_INPUT;
-	}
 	*output_data = data;
 	return OPT_SUCCESS;
 }

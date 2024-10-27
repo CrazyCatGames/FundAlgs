@@ -57,6 +57,10 @@ int main(int argc, char **argv) {
 		fprintf(output, "%u %s %s %lf\n", data[i].id, data[i].name, data[i].surname, data[i].salary);
 	}
 
+	for (int i = 0; i < size; i++) {
+		free(data[i].name);
+		free(data[i].surname);
+	}
 	free(data);
 	fclose(input);
 	fclose(output);

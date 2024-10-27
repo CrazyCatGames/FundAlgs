@@ -13,13 +13,14 @@ typedef enum kOpt{
 
 typedef struct Employee{
 	unsigned int id;
-	char name[64];
-	char surname[64];
+	char *name;
+	char *surname;
 	double salary;
 } Employee;
 
 kOpt ValidateInput(int argc, char **argv);
 kOpt ValidateData(Employee data);
+char *ReadString(FILE *file, int flag);
 kOpt GetEmployee(FILE *file, Employee **data, int *size);
 int CompareA(const void *a, const void *b);
 int CompareB(const void *a, const void *b);
