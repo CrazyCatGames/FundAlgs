@@ -5,7 +5,7 @@
 void PrintResult(const char *result, int size) {
 	int i;
 	printf("Result: ");
-	for (i = Add(size, -1); i >= 0; i = Add(i, -1)) {
+	for (i = Add(size, Add(~1, 1)); i >= 0; i = Add(i, Add(~1, 1))) {
 		putchar(result[i]);
 	}
 	putchar('\n');
@@ -35,7 +35,7 @@ kOpt Convert(char **ans, int *size, int number, int power, size_t *size_res) {
 	}
 
 	do {
-		mask = Add(1 << power, -1);
+		mask = Add(1 << power, Add(~1, 1));
 		digit = number & mask;
 		number >>= power;
 		if (*size >= *size_res){
