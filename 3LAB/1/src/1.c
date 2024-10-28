@@ -4,25 +4,25 @@
 
 void PrintResult(const char *result, int size) {
 	int i;
+	char minus_one = Add(~1, 1);
 	printf("Result: ");
-	for (i = Add(size, Add(~1, 1)); i >= 0; i = Add(i, Add(~1, 1))) {
+	for (i = Add(size, minus_one); i >= 0; i = Add(i, minus_one)) {
 		putchar(result[i]);
 	}
 	putchar('\n');
 }
 
 int Add(int a, int b) {
-	while (b != 0) {
-		int carry = a & b;
-		a = a ^ b;
-		b = carry << 1;
-	}
+	int keep = (a & b) << 1;
+	int res = a ^ b;
+	if (keep == 0) return res;
 
-	return a;
+	return Add(keep, res);
 }
 
 kOpt Convert(char **ans, int *size, int number, int power, size_t *size_res) {
 	int mask, digit;
+	int minus_one = Add(~1, 1);
 	char base[] = "0123456789ABCDEFGHIJKLMNOPQRSTUV", flag = 0;
 	*size = 0;
 	if (!ans || power < 1 || power > 5) {
@@ -35,13 +35,13 @@ kOpt Convert(char **ans, int *size, int number, int power, size_t *size_res) {
 	}
 
 	do {
-		mask = Add(1 << power, Add(~1, 1));
+		mask = Add(1 << power, minus_one);
 		digit = number & mask;
 		number >>= power;
 		if (*size >= *size_res){
-			*size_res *= 2;
-			char *tmp = (char*)realloc(*ans, sizeof(char) * *size_res);
-			if (!tmp){
+			*size_res = Add(*size_res, *size_res);
+			char *tmp = (char *)realloc(*ans, *size_res);
+			if (!tmp) {
 				return OPT_MEMORY;
 			}
 			*ans = tmp;

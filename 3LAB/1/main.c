@@ -3,13 +3,13 @@
 #include <stdlib.h>
 
 int main(void) {
-	size_t size_res = 10;
-	char *result = (char *)malloc(sizeof(char) * size_res);
+	size_t size_res = 3;
+	char *result = (char *)malloc(size_res);
 	if (!result){
 		fprintf(stderr, "Error malloc memory.\n");
 		return 1;
 	}
-	int size, power = 2, number = -52;
+	int size = 0, power = 2, number = -52;
 	kOpt status = Convert(&result, &size, number, power, &size_res);
 	switch (status) {
 		case OPT_ERROR:
