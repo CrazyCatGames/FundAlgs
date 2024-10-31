@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
 	switch (status) {
 		case OPT_SUCCESS:
 			break;
+		case OPT_ERROR:
 		case OPT_ERROR_INPUT:
 			fprintf(stderr, "Incorrect values.\n");
 			fclose(input);

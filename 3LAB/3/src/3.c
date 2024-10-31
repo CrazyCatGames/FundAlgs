@@ -25,24 +25,6 @@ kOpt ValidateInput(int argc, char **argv) {
 	return OPT_SUCCESS;
 }
 
-kOpt ValidateData(Employee data) {
-	unsigned long long len = strlen(data.name);
-	for (int i = 0; i < len; ++i) {
-		if (!((data.name[i] >= 'a' && data.name[i] <= 'z') || (data.name[i] >= 'A' && data.name[i] <= 'Z'))) return OPT_ERROR_INPUT;
-	}
-
-	len = strlen(data.surname);
-	for (int i = 0; i < len; ++i) {
-		if (!((data.surname[i] >= 'a' && data.surname[i] <= 'z') || (data.surname[i] >= 'A' && data.surname[i] <= 'Z'))) return OPT_ERROR_INPUT;
-	}
-
-	if (data.salary < EPS) {
-		return OPT_ERROR_INPUT;
-	}
-
-	return OPT_SUCCESS;
-}
-
 int CompareA(const void *a, const void *b) {
 	const Employee *temp_a = (const Employee *) a;
 	const Employee *temp_b = (const Employee *) b;
@@ -68,6 +50,7 @@ int CompareB(const void *a, const void *b) {
 }
 
 char *ReadString(FILE *file) {
+	if (!file) return NULL;
 	int capacity = 16;
 	int length = 0;
 	char *str = (char *) malloc(capacity * sizeof(char));
@@ -110,6 +93,7 @@ void FreeEmployee(Employee *data, int size) {
 }
 
 kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
+	if (!file) return OPT_ERROR;
 	int capacity = 2;
 
 	Employee *data = (Employee *) malloc(sizeof(Employee) * capacity);

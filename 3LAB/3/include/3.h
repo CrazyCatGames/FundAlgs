@@ -8,7 +8,8 @@
 typedef enum kOpt{
 	OPT_SUCCESS,
 	OPT_ERROR_INPUT,
-	OPT_ERROR_MEMORY
+	OPT_ERROR_MEMORY,
+	OPT_ERROR
 } kOpt;
 
 typedef struct Employee{
@@ -19,7 +20,6 @@ typedef struct Employee{
 } Employee;
 
 kOpt ValidateInput(int argc, char **argv);
-kOpt ValidateData(Employee data);
 char *ReadString(FILE *file);
 kOpt GetEmployee(FILE *file, Employee **data, int *size);
 int CompareA(const void *a, const void *b);
