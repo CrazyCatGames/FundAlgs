@@ -20,7 +20,7 @@ typedef struct Employee{
 
 kOpt ValidateInput(int argc, char **argv);
 kOpt ValidateData(Employee data);
-char *ReadString(FILE *file, int flag);
+char *ReadString(FILE *file);
 kOpt GetEmployee(FILE *file, Employee **data, int *size);
 int CompareA(const void *a, const void *b);
 int CompareB(const void *a, const void *b);

@@ -1,21 +1,29 @@
 #include "../include/3.h"
 #include <ctype.h>
 #include <limits.h>
-#include <math.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-kOpt ValidateInput(int argc, char **argv) {
-	if (argc != 4 || (argv[2][0] != '/' && argv[2][0] != '-') || argv[2][2] != '\0') return OPT_ERROR_INPUT;
-
-	char full_path_1[BUFSIZ], full_path_2[BUFSIZ];
-	if (!realpath(argv[1], full_path_1) || !realpath(argv[3], full_path_2)) return OPT_ERROR_INPUT;
-	if (!strcmp(full_path_1, full_path_2)) return OPT_ERROR_INPUT;
-
-	return OPT_SUCCESS;
+bool IsAlphaString(const char *str) {
+	for (size_t i = 0; str[i] != '\0'; i++) {
+		if (!isalpha((unsigned char)str[i])) {
+			return false;
+		}
+	}
+	return true;
 }
+
+//kOpt ValidateInput(int argc, char **argv) {
+//	if (argc != 4 || (argv[2][0] != '/' && argv[2][0] != '-') || argv[2][2] != '\0') return OPT_ERROR_INPUT;
+//
+//	char full_path_1[BUFSIZ], full_path_2[BUFSIZ];
+//	if (!realpath(argv[1], full_path_1) || !realpath(argv[3], full_path_2)) return OPT_ERROR_INPUT;
+//	if (!strcmp(full_path_1, full_path_2)) return OPT_ERROR_INPUT;
+//
+//	return OPT_SUCCESS;
+//}
 
 kOpt ValidateData(Employee data) {
 	unsigned long long len = strlen(data.name);
@@ -55,30 +63,38 @@ int CompareA(const void *a, const void *b) {
 	return temp_a->id - temp_b->id;
 }
 
-int CompareB(const void* a, const void *b){
+int CompareB(const void *a, const void *b) {
 	return CompareA(a, b) * -1;
 }
 
-char *ReadString(FILE *file, int flag) {
+char *ReadString(FILE *file) {
 	int capacity = 16;
 	int length = 0;
-	char *str = (char *)malloc(capacity * sizeof(char));
+	char *str = (char *) malloc(capacity * sizeof(char));
 	if (!str) return NULL;
 
 	char ch;
-	if (!flag) ch = getc(file);
-
-	while ((ch = fgetc(file)) != EOF && ch != ' ' && ch != '\n') {
-		str[length++] = ch;
+	while ((ch = fgetc(file)) == ' ');
+	if (ch != ' '){
+		ungetc(ch, file);
+	}
+	while ((ch = fgetc(file)) != EOF && ch != '\n' && ch != ' ') {
 		if (length >= capacity) {
 			capacity *= 2;
-			char *temp = (char *)realloc(str, capacity * sizeof(char));
+			char *temp = realloc(str, capacity * sizeof(char));
 			if (!temp) {
 				free(str);
 				return NULL;
 			}
 			str = temp;
 		}
+
+		str[length++] = ch;
+	}
+
+	if (length == 0) {
+		free(str);
+		return NULL;
 	}
 
 	str[length] = '\0';
@@ -99,35 +115,93 @@ kOpt GetEmployee(FILE *file, Employee **output_data, int *size) {
 	Employee *data = (Employee *) malloc(sizeof(Employee) * capacity);
 	if (!data) return OPT_ERROR_MEMORY;
 
-	while (fscanf(file, "%u", &data[*size].id) == 1) {
-		data[*size].name = ReadString(file, 0);
-		data[*size].surname = ReadString(file, 1);
+	while (1) {
+		char *id_buffer = ReadString(file);
+		if (!id_buffer) break;
 
-		if (!data[*size].name || !data[*size].surname) {
+		char *endptr;
+		unsigned long id = strtoul(id_buffer, &endptr, 10);
+
+		if (*endptr != '\0') {
+			free(id_buffer);
+			FreeEmployee(data, *size);
+			return OPT_ERROR_INPUT;
+		}
+
+		if (id > UINT_MAX) {
+			free(id_buffer);
+			FreeEmployee(data, *size);
+			return OPT_ERROR_INPUT;
+		}
+
+		data[*size].id = (unsigned int) id;
+
+		data[*size].name = ReadString(file);
+		if (!data[*size].name) {
+			free(id_buffer);
 			FreeEmployee(data, *size);
 			return OPT_ERROR_MEMORY;
 		}
 
-		if (fscanf(file, "%lf", &data[*size].salary) != 1) {
+		data[*size].surname = ReadString(file);
+		if (!data[*size].surname) {
+			free(id_buffer);
+			free(data[*size].name);
+			FreeEmployee(data, *size);
+			return OPT_ERROR_MEMORY;
+		}
+		if (!IsAlphaString(data[*size].name) || !IsAlphaString(data[*size].surname)) {
+			free(id_buffer);
+			free(data[*size].name);
 			FreeEmployee(data, *size);
 			return OPT_ERROR_INPUT;
 		}
 
-		if (ValidateData(data[*size]) != OPT_SUCCESS) {
+		char *salary_buffer = ReadString(file);
+		if (!salary_buffer) {
+			free(id_buffer);
+			free(data[*size].name);
+			free(data[*size].surname);
 			FreeEmployee(data, *size);
 			return OPT_ERROR_INPUT;
 		}
+
+		double salary = strtod(salary_buffer, &endptr);
+
+		if (*endptr != '\0') {
+			free(id_buffer);
+			free(salary_buffer);
+			free(data[*size].name);
+			free(data[*size].surname);
+			FreeEmployee(data, *size);
+			return OPT_ERROR_INPUT;
+		}
+
+		if (salary < 0) {
+			free(salary_buffer);
+			free(id_buffer);
+			free(data[*size].name);
+			free(data[*size].surname);
+			FreeEmployee(data, *size);
+			return OPT_ERROR_INPUT;
+		}
+
+		data[*size].salary = salary;
 
 		(*size)++;
 		if (*size == capacity) {
 			capacity *= 2;
 			Employee *tmp_realloc = (Employee *) realloc(data, capacity * sizeof(Employee));
 			if (!tmp_realloc) {
+				free(salary_buffer);
+				free(id_buffer);
 				FreeEmployee(data, *size);
 				return OPT_ERROR_MEMORY;
 			}
 			data = tmp_realloc;
 		}
+		free(id_buffer);
+		free(salary_buffer);
 	}
 
 	*output_data = data;

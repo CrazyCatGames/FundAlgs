@@ -4,10 +4,10 @@
 
 int main(int argc, char **argv) {
 	int size = 0;
-	if (ValidateInput(argc, argv)){
-		fprintf(stderr, "Error. Incorrect arguments. Correct: <file_in> <flag(-a /a -d /d)> <file_out>\n");
-		return -1;
-	}
+//	if (ValidateInput(argc, argv)){
+//		fprintf(stderr, "Error. Incorrect arguments. Correct: <file_in> <flag(-a /a -d /d)> <file_out>\n");
+//		return -1;
+//	}
 
 	char flag = 0;
 	if (argv[2][1] == 'd'){
