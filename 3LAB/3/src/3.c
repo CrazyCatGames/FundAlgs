@@ -15,15 +15,15 @@ bool IsAlphaString(const char *str) {
 	return true;
 }
 
-//kOpt ValidateInput(int argc, char **argv) {
-//	if (argc != 4 || (argv[2][0] != '/' && argv[2][0] != '-') || argv[2][2] != '\0') return OPT_ERROR_INPUT;
-//
-//	char full_path_1[BUFSIZ], full_path_2[BUFSIZ];
-//	if (!realpath(argv[1], full_path_1) || !realpath(argv[3], full_path_2)) return OPT_ERROR_INPUT;
-//	if (!strcmp(full_path_1, full_path_2)) return OPT_ERROR_INPUT;
-//
-//	return OPT_SUCCESS;
-//}
+kOpt ValidateInput(int argc, char **argv) {
+	if (argc != 4 || (argv[2][0] != '/' && argv[2][0] != '-') || argv[2][2] != '\0') return OPT_ERROR_INPUT;
+
+	char full_path_1[BUFSIZ], full_path_2[BUFSIZ];
+	if (!realpath(argv[1], full_path_1) || !realpath(argv[3], full_path_2)) return OPT_ERROR_INPUT;
+	if (!strcmp(full_path_1, full_path_2)) return OPT_ERROR_INPUT;
+
+	return OPT_SUCCESS;
+}
 
 kOpt ValidateData(Employee data) {
 	unsigned long long len = strlen(data.name);
