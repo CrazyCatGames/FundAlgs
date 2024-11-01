@@ -12,6 +12,7 @@ typedef struct TreeNode {
 	struct TreeNode *left, *right;
 } TreeNode;
 
+char* combineDelimiters(int argc, char *argv[]);
 int processFile(const char *file_path, const char *delimiters, TreeNode **root);
 TreeNode* insert(TreeNode *node, const char *word);
 TreeNode* createNode(const char *word);

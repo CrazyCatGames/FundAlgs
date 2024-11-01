@@ -2,18 +2,22 @@
 #include "include/9.h"
 
 int main(int argc, char *argv[]) {
-	if (argc < 2) {
+	if (argc < 3) {
 		printf("Usage: %s <file_path> <delimiters>\n", argv[0]);
 		return 1;
 	}
 
+	char *delimiters = combineDelimiters(argc, argv);
+
 	TreeNode *root = NULL;
-	int tmp = processFile(argv[1], argv[2], &root);
+	int tmp = processFile(argv[1], delimiters, &root);
 	if (tmp == -1){
 		fprintf(stderr, "Error alloc memory.\n");
+		free(delimiters);
 		return 2;
 	} else if (tmp == -2){
 		fprintf(stderr, "Error open file\n");
+		free(delimiters);
 		return 3;
 	}
 
@@ -99,6 +103,7 @@ int main(int argc, char *argv[]) {
 				FILE *file = fopen("tree.txt", "r");
 				if (!file) {
 					fprintf(stderr, "Error open file\n");
+					free(delimiters);
 					free(choice);
 					freeTree(root);
 					return 3;
@@ -106,6 +111,7 @@ int main(int argc, char *argv[]) {
 				root = loadTree(file);
 				if (!root){
 					fprintf(stderr,"Error alloc memory\n");
+					free(delimiters);
 					free(choice);
 					freeTree(root);
 					fclose(file);
@@ -127,6 +133,7 @@ int main(int argc, char *argv[]) {
 		printf("\n");
 	} while (strcmp(choice, "9") != 0);
 
+	free(delimiters);
 	free(choice);
 	freeTree(root);
 	return 0;

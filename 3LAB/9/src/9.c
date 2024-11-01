@@ -1,5 +1,22 @@
 #include "../include/9.h"
 
+char* combineDelimiters(int argc, char *argv[]) {
+	size_t total_length = 0;
+	for (int i = 2; i < argc; i++) {
+		total_length += strlen(argv[i]);
+	}
+
+	char *delimiters = malloc(total_length + 1);
+	delimiters[0] = '\0'; // Начинаем с пустой строки
+
+	for (int i = 2; i < argc; i++) {
+		strcat(delimiters, argv[i]);
+	}
+
+	return delimiters;
+}
+
+
 int processFile(const char *file_path, const char *delimiters, TreeNode **root) {
 	FILE *file = fopen(file_path, "r");
 	if (!file) {
