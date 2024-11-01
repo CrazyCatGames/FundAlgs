@@ -1,21 +1,52 @@
 #include "../include/9.h"
 
-void processFile(const char *file_path, const char *delimiters, TreeNode **root) {
+int processFile(const char *file_path, const char *delimiters, TreeNode **root) {
 	FILE *file = fopen(file_path, "r");
 	if (!file) {
-		perror("Error opening file");
-		return;
+		return -2;
 	}
 
-	char buffer[1024];
-	while (fscanf(file, "%1023s", buffer) == 1) {
-		char *word = strtok(buffer, delimiters);
-		while (word) {
-			*root = insert(*root, word);
-			word = strtok(NULL, delimiters);
+	int c;
+	char *word = NULL;
+	size_t length = 0, capacity = 0;
+
+	while ((c = fgetc(file)) != EOF) {
+		if (strchr(delimiters, c)) {
+			if (length > 0) {
+				word[length] = '\0';
+				*root = insert(*root, word);
+				if (!*root){
+					if (word) free(word);
+					return -2;
+				}
+				length = 0;
+			}
+		} else {
+			if (length + 1 >= capacity) {
+				capacity = capacity == 0 ? 16 : capacity * 2;
+				char *tmp = realloc(word, capacity);
+				if (!tmp){
+					free(word);
+					return -1;
+				}
+				word = tmp;
+			}
+			word[length++] = (char)c;
 		}
 	}
+
+	if (length > 0) {
+		word[length] = '\0';
+		*root = insert(*root, word);
+		if (!*root){
+			free(word);
+			return -2;
+		}
+	}
+
+	free(word);
 	fclose(file);
+	return 0;
 }
 
 TreeNode* insert(TreeNode *node, const char *word) {
@@ -33,6 +64,9 @@ TreeNode* insert(TreeNode *node, const char *word) {
 
 TreeNode* createNode(const char *word) {
 	TreeNode *node = (TreeNode *)malloc(sizeof(TreeNode));
+	if (!node){
+		return NULL;
+	}
 	node->word = strdup(word);
 	node->count = 1;
 	node->left = node->right = NULL;
@@ -112,6 +146,9 @@ TreeNode* loadTree(FILE *file) {
 	int count;
 	fscanf(file, "%d", &count);
 	TreeNode *node = createNode(buffer);
+	if (!node){
+		return NULL;
+	}
 	node->count = count;
 	node->left = loadTree(file);
 	node->right = loadTree(file);

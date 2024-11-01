@@ -8,7 +8,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	TreeNode *root = NULL;
-	processFile(argv[1], argv[2], &root);
+	int tmp = processFile(argv[1], argv[2], &root);
+	if (tmp == -1){
+		fprintf(stderr, "Error alloc memory.\n");
+		return 2;
+	} else if (tmp == -2){
+		fprintf(stderr, "Error open file\n");
+		return 3;
+	}
 
 	char *choice = NULL;
 	size_t choice_len = 0;
@@ -92,9 +99,18 @@ int main(int argc, char *argv[]) {
 				FILE *file = fopen("tree.txt", "r");
 				if (!file) {
 					fprintf(stderr, "Error open file\n");
-					break;
+					free(choice);
+					freeTree(root);
+					return 3;
 				}
 				root = loadTree(file);
+				if (!root){
+					fprintf(stderr,"Error alloc memory\n");
+					free(choice);
+					freeTree(root);
+					fclose(file);
+					return 2;
+				}
 				fclose(file);
 				printf("Tree loaded from tree.txt\n");
 				break;

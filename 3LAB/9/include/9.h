@@ -12,7 +12,7 @@ typedef struct TreeNode {
 	struct TreeNode *left, *right;
 } TreeNode;
 
-void processFile(const char *file_path, const char *delimiters, TreeNode **root);
+int processFile(const char *file_path, const char *delimiters, TreeNode **root);
 TreeNode* insert(TreeNode *node, const char *word);
 TreeNode* createNode(const char *word);
 void inorderPrint(TreeNode *root);
