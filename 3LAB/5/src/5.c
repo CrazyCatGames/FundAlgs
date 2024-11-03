@@ -90,12 +90,11 @@ size_t ReadStudents(const char *file_path, Student **students, size_t *count) {
 		current_student->name = ReadString(file);
 		current_student->surname = ReadString(file);
 		current_student->group = ReadString(file);
-		if (!current_student->name || !current_student->surname || !current_student->group) return -2;
 
 		if (!current_student->name || !current_student->surname || !current_student->group) {
 			FreeStudents(*students, *count);
 			fclose(file);
-			return -3;
+			return -2;
 		}
 		current_student->grades = (unsigned char *) malloc(sizeof(unsigned char) * COUNT_EXAMS);
 		if (!current_student->grades) {
