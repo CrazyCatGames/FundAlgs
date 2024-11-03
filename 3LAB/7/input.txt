@@ -1,0 +1,6 @@
+Smith John Michael 15 06 1980 M 4500.50
+Johnson Emily - 22 11 1992 W 3700.75
+Brown James Alexander 03 09 1975 M 5200.00
+Williams Sophia - 10 02 1988 W 3100.00
+Jones David Robert 28 12 1965 M 6400.25
+Taylor Olivia - 01 05 1995 W 2800.40

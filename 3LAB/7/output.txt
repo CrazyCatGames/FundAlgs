@@ -1,0 +1,6 @@
+Jones David Robert 28 12 1965 M 6400.250000
+Brown James Alexander 3 9 1975 M 5200.000000
+Smith John Michael 15 6 1980 M 4500.500000
+Williams Sophia - 10 2 1988 W 3100.000000
+Johnson Emily - 22 11 1992 W 3700.750000
+Taylor Olivia - 1 5 1995 W 2800.400000
