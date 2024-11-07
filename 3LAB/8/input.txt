@@ -4,7 +4,7 @@ Mult(2x+1);
 Add(-x^3+4x);           % Adds the polynomial -x^3 + 4x to the current value in the accumulator
 Eval(2);
 Sub(5x^2-3x+7);
-Div(x-2);
+Mod(x^2-x);
 Mult(3);
 Eval(1);                 % [sgds]
 
@@ -14,6 +14,7 @@ before performing differentiation
 ]
 
 Cmps(x-2);              % Composes the current polynomial with (x - 2)
+Div(x-3);
 
 Diff(x^3-2x^2-x+3);
 Add(10);
