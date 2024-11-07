@@ -38,7 +38,6 @@ kOpt InitString(String *string);
 kOpt DeleteString(String *string);
 kOpt AddCharToString(String *str, char ch);
 
-kOpt Div(Polynom *dividend, Polynom *divider, Polynom *quotient);
 kOpt InitPolynom(Polynom *polynom);
 kOpt InsertTerm(Polynom *polynom, int degree, int coef);
 kOpt DestroyPolynom(Polynom *polynom);

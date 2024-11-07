@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
 					return OPT_INPUT_ERROR;
 			}
 			if (count == 1) {
-				if (Div(&adder, &polynom_1, &res) != OPT_SUCCESS) {
+				if (Mod(&adder, &polynom_1, &res) != OPT_SUCCESS) {
 					DestroyPolynom(&polynom_1);
 					DestroyPolynom(&polynom_2);
 					DestroyPolynom(&res);
@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			if (count == 2) {
-				if (Div(&polynom_1, &polynom_2, &res) != OPT_SUCCESS) {
+				if (Mod(&polynom_1, &polynom_2, &res) != OPT_SUCCESS) {
 					DestroyPolynom(&polynom_1);
 					DestroyPolynom(&polynom_2);
 					DestroyPolynom(&res);

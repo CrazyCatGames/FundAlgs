@@ -330,41 +330,12 @@ kOpt Mod(Polynom *dividend, Polynom *divider, Polynom *res) {
 	InitPolynom(res);
 	while (dividend->size && (dividend->head->degree >= divider->head->degree)) {
 		Polynom new_polynom;
-		int coef = dividend->head->coef / divider->head->coef,
-			degree = dividend->head->degree - divider->head->degree;
-
-		if (dividend->head->coef % divider->head->coef) return OPT_INPUT_ERROR;
-
-		if (InsertTerm(res, degree, coef)) return OPT_MEMORY_ERROR;
-
-		InitPolynom(&new_polynom);
-
-		if (MultHelper(divider, degree, coef, &new_polynom) != OPT_SUCCESS) {
-			DestroyPolynom(&new_polynom);
-			return OPT_MEMORY_ERROR;
-		}
-		Sub(dividend, &new_polynom);
-		DestroyPolynom(&new_polynom);
-	}
-	return OPT_SUCCESS;
-}
-
-kOpt Div(Polynom *dividend, Polynom *divider, Polynom *res) {
-	if (!dividend || !divider || !res || divider->head == NULL)
-		return OPT_MEMORY_ERROR;
-
-	InitPolynom(res);
-
-
-	while (dividend->head && dividend->head->degree >= divider->head->degree) {
-		Polynom new_polynom;
-		int degree = dividend->head->degree - divider->head->degree;
 		int coef = dividend->head->coef / divider->head->coef;
+		int	degree = dividend->head->degree - divider->head->degree;
 
 		if (dividend->head->coef % divider->head->coef) return OPT_INPUT_ERROR;
 
 		if (InsertTerm(res, degree, coef) != OPT_SUCCESS) {
-			DestroyPolynom(dividend);
 			return OPT_MEMORY_ERROR;
 		}
 
@@ -377,7 +348,6 @@ kOpt Div(Polynom *dividend, Polynom *divider, Polynom *res) {
 
 		Sub(dividend, &new_polynom);
 		DestroyPolynom(&new_polynom);
-
 	}
 	return OPT_SUCCESS;
 }
