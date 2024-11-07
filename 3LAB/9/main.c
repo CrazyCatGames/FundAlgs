@@ -3,22 +3,26 @@
 
 int main(int argc, char *argv[]) {
 	if (argc < 3) {
-		printf("Usage: %s <file_path> <delimiters>\n", argv[0]);
-		return 1;
+		printf("Usage: %s <file_path> <delimiter> <delimiter> ....\n", argv[0]);
+		return OPT_INVALID_INPUTS;
 	}
 
 	char *delimiters = combineDelimiters(argc, argv);
+	if (!delimiters){
+		fprintf(stderr, "Error alloc memory.\n");
+		return 1;
+	}
 
 	TreeNode *root = NULL;
 	int tmp = processFile(argv[1], delimiters, &root);
-	if (tmp == -1){
+	if (tmp == OPT_ERROR_MEMORY){
 		fprintf(stderr, "Error alloc memory.\n");
 		free(delimiters);
-		return 2;
-	} else if (tmp == -2){
+		return OPT_ERROR_MEMORY;
+	} else if (tmp == OPT_ERROR_OPEN_FILE){
 		fprintf(stderr, "Error open file\n");
 		free(delimiters);
-		return 3;
+		return OPT_ERROR_OPEN_FILE;
 	}
 
 	char *choice = NULL;
@@ -71,7 +75,26 @@ int main(int argc, char *argv[]) {
 					char *endptr;
 					long n = strtol(input, &endptr, 10);
 					if (*endptr == '\0' && n > 0) {
-						printTopN(root, (int*)&n);
+						TreeNode **topWords;
+						int count_words = CountNodes(root);
+
+						if (count_words < n) {
+							n = count_words;
+						}
+						topWords = FindTopN(root, n);
+
+						if (topWords == NULL) {
+							fprintf(stderr, "Error alloc memory.\n");
+							return OPT_ERROR_MEMORY;
+						}
+
+						for (int i = 0; i < n; i++) {
+							if (topWords[i] != NULL) {
+								printf("%s: %d\n", topWords[i]->word, topWords[i]->count);
+							}
+						}
+
+						free(topWords);
 					} else {
 						printf("Invalid input for N.\n");
 					}
@@ -106,8 +129,9 @@ int main(int argc, char *argv[]) {
 					free(delimiters);
 					free(choice);
 					freeTree(root);
-					return 3;
+					return OPT_ERROR_OPEN_FILE;
 				}
+				freeTree(root);
 				root = loadTree(file);
 				if (!root){
 					fprintf(stderr,"Error alloc memory\n");
@@ -115,7 +139,7 @@ int main(int argc, char *argv[]) {
 					free(choice);
 					freeTree(root);
 					fclose(file);
-					return 2;
+					return OPT_ERROR_MEMORY;
 				}
 				fclose(file);
 				printf("Tree loaded from tree.txt\n");
@@ -125,6 +149,7 @@ int main(int argc, char *argv[]) {
 				printTree(root, 0);
 				break;
 			case '9':
+				printf("Exiting...\n");
 				break;
 			default:
 				printf("Incorrect input\n");
@@ -136,5 +161,5 @@ int main(int argc, char *argv[]) {
 	free(delimiters);
 	free(choice);
 	freeTree(root);
-	return 0;
+	return OPT_SUCCESS;
 }
