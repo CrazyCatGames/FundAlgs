@@ -1,6 +1,6 @@
 #include "include/7.h"
 
-int read_string(char **str) {
+int ReadString(char **str) {
 	*str = (char *) malloc(16 * sizeof(char));
 	if (!*str) {
 		return -2;
@@ -50,7 +50,7 @@ int main() {
 	char *filename = NULL;
 
 	printf("Enter filename: ");
-	int term = read_string(&filename);
+	int term = ReadString(&filename);
 	if (term == -1) {
 		free(filename);
 		fprintf(stderr, "Error alloc memory.\n");
@@ -60,13 +60,13 @@ int main() {
 		return 1;
 	}
 
-	head = load_from_file(filename);
+	head = LoadFromFile(filename);
 	if (head) {
 		printf("Data uploaded from %s.\n", filename);
 	} else {
 		fprintf(stderr, "Error upload data.\n");
-		free_list(head);
-		free_stack(undo_stack);
+		FreeList(head);
+		FreeStack(undo_stack);
 		free(filename);
 		return 1;
 	}
@@ -83,56 +83,56 @@ int main() {
 			double income;
 
 			printf("Enter surname: ");
-			char tmp = read_string(&surname);
+			char tmp = ReadString(&surname);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 			printf("Enter name: ");
-			tmp = read_string(&name);
+			tmp = ReadString(&name);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 			printf("Enter patronymic (or '-'): ");
-			tmp = read_string(&patronymic);
+			tmp = ReadString(&patronymic);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(patronymic);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
@@ -164,9 +164,18 @@ int main() {
 				printf("Invalid salary. Please enter a non-negative number.\n");
 			}
 
-			push_stack(&undo_stack, head);
+			if (PushStack(&undo_stack, head)) {
+				free(patronymic);
+				free(surname);
+				free(name);
+				FreeList(head);
+				FreeStack(undo_stack);
+				free(filename);
+				fprintf(stderr, "Error malloc memory.\n");
+				return 1;
+			}
 
-			head = add_resident(head, surname, name, patronymic, day, month, year, gender, income);
+			head = AddResident(head, surname, name, patronymic, day, month, year, gender, income);
 			printf("Liver added.\n");
 			free(patronymic);
 			free(surname);
@@ -175,43 +184,51 @@ int main() {
 		} else if (strcmp(command, "search") == 0) {
 			char *surname = NULL, *name = NULL;
 			printf("Enter surname: ");
-			int tmp = read_string(&surname);
+			int tmp = ReadString(&surname);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 			printf("Enter name: ");
-			tmp = read_string(&name);
+			tmp = ReadString(&name);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 
-			push_stack(&undo_stack, head);
+			if (PushStack(&undo_stack, head)){
+				free(surname);
+				free(name);
+				FreeList(head);
+				FreeStack(undo_stack);
+				free(filename);
+				fprintf(stderr, "Error malloc memory.\n");
+				return 1;
+			}
 
-			Node *current = search_resident(head, surname, name);
+			Node *current = SearchResident(head, surname, name);
 			if (current) {
 				printf("Surname: %s, Name: %s, Patronymic: %s, Data of birth: %02d.%02d.%04d, Gender: %c, Salary: %.2lf\n",
 					   current->data.surname, current->data.name,
@@ -228,43 +245,51 @@ int main() {
 		} else if (strcmp(command, "delete") == 0) {
 			char *surname = NULL, *name = NULL;
 			printf("Enter surname: ");
-			int tmp = read_string(&surname);
+			int tmp = ReadString(&surname);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 			printf("Enter name: ");
-			tmp = read_string(&name);
+			tmp = ReadString(&name);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 
-			push_stack(&undo_stack, head);
+			if (PushStack(&undo_stack, head)){
+				free(surname);
+				free(name);
+				FreeList(head);
+				FreeStack(undo_stack);
+				free(filename);
+				fprintf(stderr, "Error malloc memory.\n");
+				return 1;
+			}
 
-			head = delete_resident(head, surname, name);
+			head = DeleteResident(head, surname, name);
 			printf("Liver removed.\n");
 
 			free(surname);
@@ -273,43 +298,51 @@ int main() {
 		} else if (strcmp(command, "edit") == 0) {
 			char *surname = NULL, *name = NULL;
 			printf("Enter surname: ");
-			int tmp = read_string(&surname);
+			int tmp = ReadString(&surname);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 			printf("Enter name: ");
-			tmp = read_string(&name);
+			tmp = ReadString(&name);
 			if (tmp == -1) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
 				free(name);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			} else if (tmp == -2) {
 				fprintf(stderr, "Error alloc memory.\n");
-				free_list(head);
+				FreeList(head);
 				free(surname);
-				free_stack(undo_stack);
+				FreeStack(undo_stack);
 				free(filename);
 				return 1;
 			}
 
-			Node *resident = search_resident(head, surname, name);
+			Node *resident = SearchResident(head, surname, name);
 			if (resident) {
-				push_stack(&undo_stack, head);
+				if (PushStack(&undo_stack, head)){
+					free(surname);
+					free(name);
+					FreeList(head);
+					FreeStack(undo_stack);
+					free(filename);
+					fprintf(stderr, "Error malloc memory.\n");
+					return 1;
+				}
 
 				printf("Editing resident %s %s\n", surname, name);
 
@@ -319,7 +352,7 @@ int main() {
 				char gender;
 
 				printf("Enter new surname (or press enter to keep current): ");
-				read_string(&new_surname);
+				ReadString(&new_surname);
 				if (strlen(new_surname) > 0) {
 					free(resident->data.surname);
 					resident->data.surname = new_surname;
@@ -328,7 +361,7 @@ int main() {
 				}
 
 				printf("Enter new name (or press enter to keep current): ");
-				read_string(&new_name);
+				ReadString(&new_name);
 				if (strlen(new_name) > 0) {
 					free(resident->data.name);
 					resident->data.name = new_name;
@@ -337,7 +370,7 @@ int main() {
 				}
 
 				printf("Enter new patronymic (or '-' to remove, press enter to keep current): ");
-				read_string(&new_patronymic);
+				ReadString(&new_patronymic);
 				if (strcmp(new_patronymic, "-") == 0) {
 					free(resident->data.patronymic);
 					resident->data.patronymic = NULL;
@@ -395,28 +428,28 @@ int main() {
 			free(name);
 
 		} else if (strcmp(command, "display") == 0) {
-			display_residents(head);
+			DisplayResidents(head);
 
 		} else if (strcmp(command, "save") == 0) {
 			char *filenameout = NULL;
 			printf("Enter file path to save data: ");
-			int tmp = read_string(&filenameout);
+			int tmp = ReadString(&filenameout);
 			if (tmp == -2) {
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				return 1;
 			} else if (tmp == -1) {
-				free_list(head);
-				free_stack(undo_stack);
+				FreeList(head);
+				FreeStack(undo_stack);
 				free(filenameout);
 				return 1;
 			}
-			if (strcmp(filename, filenameout) == 0){
+			if (strcmp(filename, filenameout) == 0) {
 				free(filenameout);
 				fprintf(stderr, "Input file can't be output file. Saving is failed.\n");
 				continue;
 			}
-			if (save_to_file(head, filenameout)) {
+			if (SaveToFile(head, filenameout)) {
 				fprintf(stderr, "Error open file.\n");
 				break;
 			}
@@ -424,7 +457,7 @@ int main() {
 			free(filenameout);
 
 		} else if (strcmp(command, "undo") == 0) {
-		 	!perform_undo(&head, &undo_stack) ? printf("Undo completed.\n") : printf("Nothind to undo.\n");
+			!PerformUndo(&head, &undo_stack) ? printf("Undo completed.\n") : printf("Nothind to undo.\n");
 
 		} else if (strcmp(command, "quit") == 0) {
 			break;
@@ -434,8 +467,8 @@ int main() {
 		}
 	}
 
-	free_list(head);
-	free_stack(undo_stack);
+	FreeList(head);
+	FreeStack(undo_stack);
 	free(filename);
 	return 0;
 }

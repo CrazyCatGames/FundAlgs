@@ -13,7 +13,7 @@ int ValidData(int day, int month, int year) {
 	return day <= days_in_month[month];
 }
 
-Node *load_from_file(const char *filename) {
+Node *LoadFromFile(const char *filename) {
 	FILE *file = fopen(filename, "r");
 	if (!file) return NULL;
 
@@ -72,14 +72,16 @@ Node *load_from_file(const char *filename) {
 			return NULL;
 		}
 
-		head = insert_sorted(head, temp);
+		head = InsertSorted(head, temp);
+		if (!head) return NULL;
 	}
+
 	free(line);
 	fclose(file);
 	return head;
 }
 
-int save_to_file(Node *head, const char *filename) {
+int SaveToFile(Node *head, const char *filename) {
 	FILE *file = fopen(filename, "w");
 	if (!file) return 1;
 
@@ -95,7 +97,7 @@ int save_to_file(Node *head, const char *filename) {
 	return 0;
 }
 
-Node *delete_resident(Node *head, const char *surname, const char *name) {
+Node *DeleteResident(Node *head, const char *surname, const char *name) {
 	Node *current = head;
 	Node *prev = NULL;
 
@@ -121,8 +123,8 @@ Node *delete_resident(Node *head, const char *surname, const char *name) {
 	return head;
 }
 
-Node *add_resident(Node *head, const char *surname, const char *name, const char *patronymic,
-				   int day, int month, int year, char gender, double income) {
+Node *AddResident(Node *head, const char *surname, const char *name, const char *patronymic,
+				  int day, int month, int year, char gender, double income) {
 	Liver temp;
 	temp.surname = strdup(surname);
 	temp.name = strdup(name);
@@ -133,11 +135,11 @@ Node *add_resident(Node *head, const char *surname, const char *name, const char
 	temp.gender = gender;
 	temp.income = income;
 
-	head = insert_sorted(head, temp);
+	head = InsertSorted(head, temp);
 	return head;
 }
 
-Node *search_resident(Node *head, const char *surname, const char *name) {
+Node *SearchResident(Node *head, const char *surname, const char *name) {
 	Node *current = head;
 	while (current) {
 		if (strcmp(current->data.surname, surname) == 0 &&
@@ -149,7 +151,7 @@ Node *search_resident(Node *head, const char *surname, const char *name) {
 	return NULL;
 }
 
-void display_residents(const Node *head) {
+void DisplayResidents(const Node *head) {
 	const Node *current = head;
 	while (current) {
 		printf("Surname: %s, Name: %s, Patronymic: %s, Data of birth: %02d.%02d.%04d, Gender: %c, Salary: %.2lf\n",
@@ -161,7 +163,7 @@ void display_residents(const Node *head) {
 	}
 }
 
-int perform_undo(Node **head, StackNode **undo_stack) {
+int PerformUndo(Node **head, StackNode **undo_stack) {
 	int count = 0;
 	StackNode *temp = *undo_stack;
 	while (temp != NULL) {
@@ -172,16 +174,15 @@ int perform_undo(Node **head, StackNode **undo_stack) {
 	int undo_count = (count + 1) / 2;
 	if (undo_count == 0) return 1;
 
-
 	for (int i = 0; i < undo_count; i++) {
 		if (*undo_stack == NULL) break;
 
 		StackNode *top = *undo_stack;
+
 		*head = top->state;
 		*undo_stack = top->next;
 
-		free(top);
+		FreeStack(top);
 	}
 	return 0;
 }
-
