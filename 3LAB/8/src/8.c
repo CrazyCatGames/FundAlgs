@@ -28,11 +28,12 @@ kOpt InsertTerm(Polynom *polynom, int degree, int coef) {
 	if (!coef) return OPT_SUCCESS;
 
 	Term *temp;
-	if (!polynom) return OPT_MEMORY_ERROR;
+	if (!polynom) return OPT_ZERO_ARGS;
 
 	if (polynom->size == 0) {
 		polynom->head = (Term *) malloc(sizeof(Term));
 		if (!polynom->head) return OPT_MEMORY_ERROR;
+
 		polynom->size++;
 		polynom->head->coef = coef;
 		polynom->head->degree = degree;
@@ -51,10 +52,11 @@ kOpt InsertTerm(Polynom *polynom, int degree, int coef) {
 		return OPT_SUCCESS;
 	}
 	if (polynom->head->degree == degree) {
-		if (coef > 0 && INT_MAX - coef < polynom->head->coef)
-			return OPT_MEMORY_ERROR;
-		else if (coef < 0 && INT_MIN - coef > polynom->head->coef)
-			return OPT_MEMORY_ERROR;
+		if (coef > 0 && INT_MAX - coef < polynom->head->coef) {
+			return OPT_OVERFLOW_ERROR;
+		} else if (coef < 0 && INT_MIN - coef > polynom->head->coef) {
+			return OPT_OVERFLOW_ERROR;
+		}
 
 		polynom->head->coef += coef;
 		if (polynom->head->coef == 0) {
@@ -79,10 +81,12 @@ kOpt InsertTerm(Polynom *polynom, int degree, int coef) {
 			return OPT_SUCCESS;
 		}
 		if (temp->next->degree == degree) {
-			if (coef > 0 && INT_MAX - coef < temp->next->coef)
+			if (coef > 0 && INT_MAX - coef < temp->next->coef) {
 				return OPT_MEMORY_ERROR;
-			else if (coef < 0 && INT_MIN - coef > temp->next->coef)
+			} else if (coef < 0 && INT_MIN - coef > temp->next->coef) {
 				return OPT_MEMORY_ERROR;
+			}
+
 			temp->next->coef += coef;
 			if (temp->next->coef == 0) {
 				Term *to_delete = temp->next;
@@ -100,8 +104,7 @@ kOpt InsertTerm(Polynom *polynom, int degree, int coef) {
 kOpt CreatePolynom(Polynom *polynom, const char *expression) {
 	int coef, sign = 1, degree;
 	const char *symbol = expression;
-	if (!polynom || !expression)
-		return OPT_MEMORY_ERROR;
+	if (!polynom || !expression) return OPT_ZERO_ARGS;
 
 	InitPolynom(polynom);
 	while (*symbol != '\0') {
@@ -109,21 +112,22 @@ kOpt CreatePolynom(Polynom *polynom, const char *expression) {
 			sign = (*symbol == '+') ? 1 : -1;
 			coef = 0;
 			symbol++;
-			if (!isdigit(*symbol) && *symbol != 'x')
-				return OPT_INPUT_ERROR;
+			if (!isdigit(*symbol) && *symbol != 'x') return OPT_INPUT_ERROR;
+
 			if (*symbol == 'x') {
 				coef = 1;
 				continue;
 			}
 			while (*symbol != 0 && isdigit(*symbol)) {
-				if (INT_MAX / 10 < coef)
-					return OPT_MEMORY_ERROR;
+				if (INT_MAX / 10 < coef) return OPT_MEMORY_ERROR;
+
 				coef *= 10;
-				if (INT_MAX - (*symbol - '0') < coef)
-					return OPT_MEMORY_ERROR;
+				if (INT_MAX - (*symbol - '0') < coef) return OPT_MEMORY_ERROR;
+
 				coef += *symbol - '0';
 				symbol++;
 			}
+
 			if (*symbol != 'x') {
 				if (InsertTerm(polynom, 0, coef * sign) == OPT_MEMORY_ERROR) return OPT_MEMORY_ERROR;
 				coef = 0;
@@ -175,7 +179,7 @@ kOpt CreatePolynom(Polynom *polynom, const char *expression) {
 
 kOpt Add(Polynom *polynom_1, Polynom *polynom_2) {
 	Term *temp;
-	if (!polynom_1 || !polynom_2) return OPT_MEMORY_ERROR;
+	if (!polynom_1 || !polynom_2) return OPT_ZERO_ARGS;
 
 	temp = polynom_2->head;
 	while (temp) {
@@ -187,7 +191,7 @@ kOpt Add(Polynom *polynom_1, Polynom *polynom_2) {
 
 kOpt Sub(Polynom *polynom_1, Polynom *polynom_2) {
 	Term *temp;
-	if (!polynom_1 || !polynom_2) return OPT_MEMORY_ERROR;
+	if (!polynom_1 || !polynom_2) return OPT_ZERO_ARGS;
 
 	temp = polynom_2->head;
 	while (temp) {
@@ -203,14 +207,12 @@ kOpt Multiply(Polynom *polynom_1, Polynom *polynom_2, Polynom *res) {
 
 	InitPolynom(res);
 	temp_1 = polynom_1->head;
-	temp_2 = polynom_2->head;
 	while (temp_1) {
 		temp_2 = polynom_2->head;
 		while (temp_2) {
 			int check_overflov = temp_1->coef * temp_2->coef;
 			if (INT_MAX - temp_1->degree < temp_2->degree || (temp_1->coef && check_overflov / temp_1->coef != temp_2->coef)) return OPT_OVERFLOW_ERROR;
 			if (InsertTerm(res, temp_1->degree + temp_2->degree, temp_1->coef * temp_2->coef) == OPT_MEMORY_ERROR) return OPT_MEMORY_ERROR;
-
 			temp_2 = temp_2->next;
 		}
 		temp_1 = temp_1->next;
@@ -221,19 +223,24 @@ kOpt Multiply(Polynom *polynom_1, Polynom *polynom_2, Polynom *res) {
 kOpt Eval(Polynom *polynom, double x, double *result) {
 	Term *temp;
 	int i, last_degree = 0;
-	if (!polynom || !result) return OPT_MEMORY_ERROR;
+	if (!polynom || !result) return OPT_ZERO_ARGS;
 
 	temp = polynom->head;
 	*result = 0;
 	if (x == 0) {
 		if (!temp) return OPT_SUCCESS;
-		while (temp->next) temp = temp->next;
+		while (temp->next) {
+			temp = temp->next;
+		}
+
 		if (temp->degree == 0) *result = temp->coef;
+
 		return OPT_SUCCESS;
 	}
 	while (temp) {
 		for (i = 0; i < last_degree - temp->degree; ++i) {
 			*result *= x;
+
 			if (*result == INFINITY || *result == -INFINITY) {
 				*result = (x < 0 && ((last_degree - temp->degree) & 2)) ? (-INFINITY) : (INFINITY);
 				return OPT_SUCCESS;
@@ -252,13 +259,14 @@ kOpt Eval(Polynom *polynom, double x, double *result) {
 
 kOpt Diff(Polynom *polynom, Polynom *res) {
 	Term *temp, *temp_res;
-	if (!polynom || !res) return OPT_MEMORY_ERROR;
+	if (!polynom || !res) return OPT_ZERO_ARGS;
 
 	InitPolynom(res);
 	temp = polynom->head;
 	while (temp && temp->degree > 0) {
 		if (res->size == 0) {
 			res->head = (Term *) malloc(sizeof(Term));
+
 			if (!res->head) return OPT_MEMORY_ERROR;
 
 			res->head->next = NULL;
@@ -268,6 +276,7 @@ kOpt Diff(Polynom *polynom, Polynom *res) {
 			res->size++;
 		} else {
 			temp_res->next = (Term *) malloc(sizeof(Term));
+
 			if (!temp_res->next) return OPT_MEMORY_ERROR;
 
 			temp_res = temp_res->next;
@@ -276,6 +285,7 @@ kOpt Diff(Polynom *polynom, Polynom *res) {
 			temp_res->degree = temp->degree - 1;
 			res->size++;
 		}
+
 		temp = temp->next;
 	}
 	return OPT_SUCCESS;
@@ -285,7 +295,7 @@ kOpt Cmps(Polynom *polynom_1, Polynom *polynom_2, Polynom *result) {
 	Term *temp;
 	Polynom res;
 	int i, last_degree = 0;
-	if (!polynom_1 || !polynom_2 || !result) return OPT_MEMORY_ERROR;
+	if (!polynom_1 || !polynom_2 || !result) return OPT_ZERO_ARGS;
 
 	InitPolynom(result);
 	temp = polynom_1->head;
@@ -311,33 +321,34 @@ kOpt Cmps(Polynom *polynom_1, Polynom *polynom_2, Polynom *result) {
 
 kOpt MultHelper(Polynom *polynom_1, int degree, int coef, Polynom *res) {
 	Term *temp_1;
-	if (!polynom_1 || !res) return OPT_MEMORY_ERROR;
+	if (!polynom_1 || !res) return OPT_ZERO_ARGS;
 
 	InitPolynom(res);
 	temp_1 = polynom_1->head;
 	while (temp_1) {
 		int check_overflov = temp_1->coef * coef;
+
 		if (INT_MAX - temp_1->degree < degree || (temp_1->coef && check_overflov / temp_1->coef != coef)) return OPT_OVERFLOW_ERROR;
+
 		if (InsertTerm(res, temp_1->degree + degree, temp_1->coef * coef) == OPT_MEMORY_ERROR) return OPT_MEMORY_ERROR;
+
 		temp_1 = temp_1->next;
 	}
 	return OPT_SUCCESS;
 }
 
 kOpt Mod(Polynom *dividend, Polynom *divider, Polynom *res) {
-	if (!dividend || !divider || !res || !divider->size) return OPT_MEMORY_ERROR;
+	if (!dividend || !divider || !res || !divider->size) return OPT_ZERO_ARGS;
 
 	InitPolynom(res);
 	while (dividend->size && (dividend->head->degree >= divider->head->degree)) {
 		Polynom new_polynom;
 		int coef = dividend->head->coef / divider->head->coef;
-		int	degree = dividend->head->degree - divider->head->degree;
+		int degree = dividend->head->degree - divider->head->degree;
 
 		if (dividend->head->coef % divider->head->coef) return OPT_INPUT_ERROR;
 
-		if (InsertTerm(res, degree, coef) != OPT_SUCCESS) {
-			return OPT_MEMORY_ERROR;
-		}
+		if (InsertTerm(res, degree, coef) != OPT_SUCCESS) return OPT_MEMORY_ERROR;
 
 		InitPolynom(&new_polynom);
 
@@ -355,14 +366,17 @@ kOpt Mod(Polynom *dividend, Polynom *divider, Polynom *res) {
 kOpt GetExpression(Polynom *polynom_1, Polynom *polynom_2, FILE *input, int *count) {
 	char ch, created = 0;
 	String expr;
-	kOpt state;
-	if (!polynom_1 || !polynom_2 || !input || !count)
-		return OPT_MEMORY_ERROR;
+	kOpt status;
+
+	if (!polynom_1 || !polynom_2 || !input || !count) return OPT_ZERO_ARGS;
 
 	*count = 0;
 	ch = getc(input);
+
 	if (ch != '(') return OPT_INPUT_ERROR;
+
 	if (InitString(&expr)) return OPT_MEMORY_ERROR;
+
 	while (!feof(input)) {
 		ch = getc(input);
 		if (ch == ',') {
@@ -370,12 +384,16 @@ kOpt GetExpression(Polynom *polynom_1, Polynom *polynom_2, FILE *input, int *cou
 				DeleteString(&expr);
 				return OPT_INPUT_ERROR;
 			}
-			if ((state = CreatePolynom(polynom_1, expr.arr)) == OPT_MEMORY_ERROR) {
+
+			if ((status = CreatePolynom(polynom_1, expr.arr)) == OPT_MEMORY_ERROR) {
 				DeleteString(&expr);
 				return OPT_MEMORY_ERROR;
 			}
+
 			DeleteString(&expr);
-			if (state == OPT_INPUT_ERROR) return OPT_INPUT_ERROR;
+
+			if (status == OPT_INPUT_ERROR) return OPT_INPUT_ERROR;
+
 			created = 1;
 			*count = 1;
 		} else if (isdigit(ch) || ch == '+' || ch == '-' || ch == '^' || ch == 'x') {
@@ -392,10 +410,12 @@ kOpt GetExpression(Polynom *polynom_1, Polynom *polynom_2, FILE *input, int *cou
 				DeleteString(&expr);
 				return OPT_INPUT_ERROR;
 			}
-			state = CreatePolynom((created ? polynom_2 : polynom_1), expr.arr);
+
+			status = CreatePolynom((created ? polynom_2 : polynom_1), expr.arr);
 			DeleteString(&expr);
-			if (state)
-				return state;
+
+			if (status != OPT_SUCCESS) return status;
+
 			*count += 1;
 			break;
 		} else {
@@ -410,7 +430,7 @@ kOpt GetExpression(Polynom *polynom_1, Polynom *polynom_2, FILE *input, int *cou
 
 kOpt PrintPolynom(Polynom *polynom) {
 	Term *temp;
-	if (!polynom) return OPT_MEMORY_ERROR;
+	if (!polynom) return OPT_ZERO_ARGS;
 
 	if (!polynom->size) printf("0");
 
@@ -438,7 +458,7 @@ kOpt PrintPolynom(Polynom *polynom) {
 }
 
 kOpt InitString(String *string) {
-	if (!string) return OPT_MEMORY_ERROR;
+	if (!string) return OPT_ZERO_ARGS;
 	string->capacity = 1;
 	string->len = 0;
 
@@ -449,7 +469,7 @@ kOpt InitString(String *string) {
 }
 
 kOpt DeleteString(String *string) {
-	if (!string) return OPT_MEMORY_ERROR;
+	if (!string) return OPT_ZERO_ARGS;
 
 	free(string->arr);
 	string->arr = NULL;
@@ -459,7 +479,7 @@ kOpt DeleteString(String *string) {
 }
 
 kOpt AddCharToString(String *str, char ch) {
-	if (!str) return OPT_MEMORY_ERROR;
+	if (!str) return OPT_ZERO_ARGS;
 	if (str->capacity == 0) {
 		if (InitString(str)) return OPT_MEMORY_ERROR;
 	}

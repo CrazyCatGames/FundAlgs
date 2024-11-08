@@ -13,7 +13,7 @@ Multiline comment
 before performing differentiation
 ]
 
-Cmps(x-2);              % Composes the current polynomial with (x - 2)
+Cmps(x^2-2);              % Composes the current polynomial with (x - 2)
 Div(x-3);
 
 Diff(x^3-2x^2-x+3);
