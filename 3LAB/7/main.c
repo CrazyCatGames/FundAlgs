@@ -140,6 +140,7 @@ int main() {
 			while (1) {
 				printf("Enter date of birth (day month year): ");
 				scanf("%d %d %d", &day, &month, &year);
+				getchar();
 				if (IsValidDate(day, month, year)) {
 					break;
 				}
@@ -457,7 +458,7 @@ int main() {
 			free(filenameout);
 
 		} else if (strcmp(command, "undo") == 0) {
-			!PerformUndo(&head, &undo_stack) ? printf("Undo completed.\n") : printf("Nothind to undo.\n");
+			!PerformUndo(&head, &undo_stack) ? printf("Undo completed.\n") : printf("Nothing to undo.\n");
 
 		} else if (strcmp(command, "quit") == 0) {
 			break;
