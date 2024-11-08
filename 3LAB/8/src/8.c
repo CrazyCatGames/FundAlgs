@@ -266,7 +266,6 @@ kOpt Diff(Polynom *polynom, Polynom *res) {
 	while (temp && temp->degree > 0) {
 		if (res->size == 0) {
 			res->head = (Term *) malloc(sizeof(Term));
-
 			if (!res->head) return OPT_MEMORY_ERROR;
 
 			res->head->next = NULL;
@@ -306,7 +305,7 @@ kOpt Cmps(Polynom *polynom_1, Polynom *polynom_2, Polynom *result) {
 			*result = res;
 			InitPolynom(&res);
 		}
-		InsertTerm(result, 0, temp->coef);
+		if (InsertTerm(result, 0, temp->coef) != OPT_SUCCESS) return OPT_MEMORY_ERROR;
 		last_degree = temp->degree;
 		temp = temp->next;
 	}
@@ -484,9 +483,8 @@ kOpt AddCharToString(String *str, char ch) {
 		if (InitString(str)) return OPT_MEMORY_ERROR;
 	}
 	if (str->capacity == str->len + 1) {
-		char *for_realloc;
 		str->capacity *= 2;
-		for_realloc = (char *) realloc(str->arr, str->capacity * sizeof(char));
+		char *for_realloc = (char *) realloc(str->arr, str->capacity * sizeof(char));
 		if (!for_realloc) {
 			DeleteString(str);
 			return OPT_MEMORY_ERROR;
