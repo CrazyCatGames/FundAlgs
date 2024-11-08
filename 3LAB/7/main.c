@@ -150,6 +150,7 @@ int main() {
 			while (1) {
 				printf("Enter gender (M/W): ");
 				scanf(" %c", &gender);
+				getchar();
 				if ((gender == 'M' || gender == 'W')) {
 					break;
 				}
