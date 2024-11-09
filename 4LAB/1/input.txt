@@ -1,0 +1,17 @@
+#define MAX_LENGTH 1024
+#define AUTHOR_NAME "John Doe"
+#define VERSION "1.0.0"
+
+
+
+Lorem ipsum dolor sit amet FIF consectetur adipiscing MAX_LENGTH
+Sed sit amet felis nec leo sodales sollicitudin a eu nunc
+Quisque tristique purus vel neque vehicula, vel pharetra VERSION convallis
+Curabitur auctor eros eu ante rhoncus in efficitur purus condimentum
+Nulla facilisi Proin vulputate tincidunt orci sed suscipit nunc viverra ac
+Integer in AUTHOR_NAME
+
+#define FIF 101
+
+FIF FIF FIF FI
+F
